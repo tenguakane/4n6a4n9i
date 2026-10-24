@@ -829,13 +829,21 @@ const SHEETS = {
 
 /* =================== картинки (canvas) =================== */
 const IMG = { W: 540, k: 2, bg: "#f2f2f7", card: "#ffffff", tx: "#1c1c1e", mu: "#8a8a8e", sep: "#e5e5ea", acc: "#ff375f", font: '-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Arial,sans-serif' };
-function mkCanvas(h){ const c = document.createElement("canvas"); c.width = IMG.W * IMG.k; c.height = Math.ceil(h * IMG.k); const x = c.getContext("2d"); x.scale(IMG.k, IMG.k); x.fillStyle = IMG.bg; x.fillRect(0, 0, IMG.W, h); x.textBaseline = "alphabetic"; return [c, x]; }
+function hexA(hex, a){ const m = String(hex).trim().match(/^#([0-9a-f]{6})$/i); if (!m) return hex; const n = parseInt(m[1], 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; }
+function imgTheme(){ // цвета картинки = цвета текущей темы приложения
+  const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  const t = document.documentElement.getAttribute("data-theme") || "light";
+  Object.assign(IMG, { bg: v("--bg"), card: v("--card"), tx: v("--tx"), mu: v("--tx2"), mu2: v("--tx3"), sep: v("--sep"), acc: v("--acc"), g1: v("--g1"), g2: v("--g2"), kid: v("--kid"), dark: t !== "light",
+    glow: { fox: .22, violet: .26, midnight: .2 }[t] || 0,
+    kc: { day: v("--day"), evening: v("--eve"), custom: v("--cus") }, oc: { weekend: v("--wknd"), sick: v("--sick"), vacation: v("--vac") } });
+}
+function mkCanvas(h){ const c = document.createElement("canvas"); c.width = IMG.W * IMG.k; c.height = Math.ceil(h * IMG.k); const x = c.getContext("2d"); x.scale(IMG.k, IMG.k); x.fillStyle = IMG.bg; x.fillRect(0, 0, IMG.W, h); if (IMG.glow) { const g = x.createRadialGradient(IMG.W, -20, 0, IMG.W, -20, 420); g.addColorStop(0, hexA(IMG.acc, IMG.glow)); g.addColorStop(1, hexA(IMG.acc, 0)); x.fillStyle = g; x.fillRect(0, 0, IMG.W, Math.min(h, 460)); } x.textBaseline = "alphabetic"; return [c, x]; }
 const F = (w, s) => `${w} ${s}px ${IMG.font}`;
 function rr(x, X, Y, w, h, r, fill){ x.beginPath(); if (x.roundRect) x.roundRect(X, Y, w, h, r); else { x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + h, r); x.arcTo(X + w, Y + h, X, Y + h, r); x.arcTo(X, Y + h, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.closePath(); } if (fill) { x.fillStyle = fill; x.fill(); } }
 function tx(x, s, X, Y, font, col, align = "left", maxW){ x.font = font; x.fillStyle = col; x.textAlign = align; let t = String(s); if (maxW) { while (t.length > 1 && x.measureText(t).width > maxW) t = t.slice(0, -2) + "…"; } x.fillText(t, X, Y); return x.measureText(t).width; }
 function pillC(x, s, X, Y, col, font = F(700, 13), h = 24, align = "left"){ x.font = font; const w = x.measureText(s).width + 18; const L = align === "right" ? X - w : X; rr(x, L, Y, w, h, h / 2, col); tx(x, s, L + 9, Y + h / 2 + 4.6, font, "#fff"); return w; }
 function header(x, title, sub){ tx(x, title, 24, 52, F(800, 27), IMG.tx); tx(x, sub, 24, 78, F(500, 15), IMG.mu, "left", IMG.W - 48); }
-function footer(x, h){ tx(x, "Смены няни", IMG.W / 2, h - 18, F(500, 11.5), "#b0b0b5", "center"); }
+function footer(x, h){ tx(x, "Смены няни", IMG.W / 2, h - 18, F(500, 11.5), IMG.mu2, "center"); }
 function imgWeek(ref){
   const a = weekStart(ref), rowH = 60, top = 100, h = top + rowH * 7 + 16 + 64 + 44;
   const [c, x] = mkCanvas(h);
@@ -849,9 +857,9 @@ function imgWeek(ref){
     tx(x, dShort(d), 32, y + 46, F(500, 13), IMG.mu);
     if (isT) { rr(x, 22, y + 14, 4, 32, 2, IMG.acc); }
     let X = 104;
-    for (const s of sh) { X += pillC(x, sLabel(s), X, y + 18, KHEX[s.kind]) + 6; if (s.sick) X += pillC(x, "болеет", X, y + 18, "#ff2d55") + 6; H += hrs(s); N++; }
-    for (const o of of) X += pillC(x, OFF[o.kind], X, y + 18, OHEX[o.kind]) + 6;
-    if (!sh.length && !of.length) tx(x, "—", 104, y + 36, F(500, 15), "#c7c7cc");
+    for (const s of sh) { X += pillC(x, sLabel(s), X, y + 18, IMG.kc[s.kind]) + 6; if (s.sick) X += pillC(x, "болеет", X, y + 18, IMG.kid) + 6; H += hrs(s); N++; }
+    for (const o of of) X += pillC(x, OFF[o.kind], X, y + 18, IMG.oc[o.kind]) + 6;
+    if (!sh.length && !of.length) tx(x, "—", 104, y + 36, F(500, 15), IMG.mu2);
     if (sh.length) tx(x, fH(sh.reduce((t, s) => t + hrs(s), 0)), IMG.W - 32, y + 36, F(700, 16), IMG.tx, "right");
   }
   const y2 = top + rowH * 7 + 16;
@@ -873,13 +881,13 @@ function imgMonth(ref){
     const col = i % 7, row = Math.floor(i / 7), X = 16 + col * cw, Y = top + row * ch, inM = d.slice(0, 7) === m.slice(0, 7);
     if (!inM) continue;
     const sh = shiftsOn(d), of = offOn(d);
-    if (of.length) rr(x, X + 3, Y + 2, cw - 6, ch - 6, 10, OHEX[of[0].kind] + "22");
+    if (of.length) { x.globalAlpha = IMG.dark ? .2 : .14; rr(x, X + 3, Y + 2, cw - 6, ch - 6, 10, IMG.oc[of[0].kind]); x.globalAlpha = 1; }
     if (d === today()) { x.strokeStyle = IMG.acc; x.lineWidth = 1.5; rr(x, X + 3, Y + 2, cw - 6, ch - 6, 10); x.stroke(); }
     tx(x, String(pd(d).getDate()), X + 9, Y + 19, F(700, 13), IMG.tx);
-    if (sh.some(s => s.sick)) { x.fillStyle = "#ff2d55"; x.beginPath(); x.arc(X + cw - 12, Y + 13, 3.5, 0, 7); x.fill(); }
-    sh.slice(0, 2).forEach((s, k) => { const py = Y + 27 + k * 20; rr(x, X + 6, py, cw - 12, 17, 5, KHEX[s.kind]); tx(x, s.kind === "custom" ? sShort(s) : s.kind === "day" ? "Дневная" : "Вечер", X + cw / 2, py + 12.5, F(700, 10), "#fff", "center", cw - 16); H += hrs(s); N++; });
+    if (sh.some(s => s.sick)) { x.fillStyle = IMG.kid; x.beginPath(); x.arc(X + cw - 12, Y + 13, 3.5, 0, 7); x.fill(); }
+    sh.slice(0, 2).forEach((s, k) => { const py = Y + 27 + k * 20; rr(x, X + 6, py, cw - 12, 17, 5, IMG.kc[s.kind]); tx(x, s.kind === "custom" ? sShort(s) : s.kind === "day" ? "Дневная" : "Вечер", X + cw / 2, py + 12.5, F(700, 10), "#fff", "center", cw - 16); H += hrs(s); N++; });
     if (sh.length > 2) sh.slice(2).forEach(s => { H += hrs(s); N++; });
-    if (!sh.length && of.length) tx(x, of[0].kind === "weekend" ? "Вых." : of[0].kind === "sick" ? "Больн." : "Отпуск", X + cw / 2, Y + 44, F(700, 10.5), OHEX[of[0].kind], "center", cw - 10);
+    if (!sh.length && of.length) tx(x, of[0].kind === "weekend" ? "Вых." : of[0].kind === "sick" ? "Больн." : "Отпуск", X + cw / 2, Y + 44, F(700, 10.5), IMG.oc[of[0].kind], "center", cw - 10);
     if (sh.length === 1) tx(x, fH(hrs(sh[0])), X + cw / 2, Y + 60, F(600, 10.5), IMG.mu, "center");
   }
   let y2 = top + weeks * ch + 18;
@@ -887,7 +895,7 @@ function imgMonth(ref){
   tx(x, "Итого за месяц", 32, y2 + 38, F(600, 16), IMG.mu);
   tx(x, `${N} ${plural(N, "смена", "смены", "смен")} · ${fH(H)}`, IMG.W - 32, y2 + 39, F(800, 19), IMG.tx, "right");
   y2 += 80; let X = 24;
-  const leg = [["Дневная", KHEX.day], ["Вечерняя", KHEX.evening], ["По часам", KHEX.custom], ["Выходной", OHEX.weekend], ["Больничный", OHEX.sick], ["Отпуск", OHEX.vacation], ["Ребёнок болеет", "#ff2d55"]];
+  const leg = [["Дневная", IMG.kc.day], ["Вечерняя", IMG.kc.evening], ["По часам", IMG.kc.custom], ["Выходной", IMG.oc.weekend], ["Больничный", IMG.oc.sick], ["Отпуск", IMG.oc.vacation], ["Ребёнок болеет", IMG.kid]];
   let ly = y2;
   for (const [l, cl] of leg) { x.font = F(500, 12); const w = x.measureText(l).width + 26; if (X + w > IMG.W - 16) { X = 24; ly += 20; } x.fillStyle = cl; x.beginPath(); x.arc(X + 5, ly - 4, 5, 0, 7); x.fill(); tx(x, l, X + 14, ly, F(500, 12), IMG.mu); X += w; }
   footer(x, h); return c;
@@ -907,9 +915,9 @@ function imgPay(pm, ref){
   list.forEach(({ s, c: cc }, i) => {
     const Y = y + i * rowH; x.fillStyle = IMG.sep; x.fillRect(32, Y, IMG.W - 64, 1);
     tx(x, `${dShort(s.date)}, ${WD[wdi(s.date)].toLowerCase()}`, cx[0], Y + 25, F(600, 13.5), IMG.tx);
-    x.fillStyle = KHEX[s.kind]; x.beginPath(); x.arc(cx[1] + 4, Y + 20.5, 4, 0, 7); x.fill();
+    x.fillStyle = IMG.kc[s.kind]; x.beginPath(); x.arc(cx[1] + 4, Y + 20.5, 4, 0, 7); x.fill();
     const w = tx(x, sLabel(s), cx[1] + 14, Y + 25, F(500, 13.5), IMG.tx, "left", 140);
-    if (s.sick) pillC(x, "болеет", cx[1] + 20 + w, Y + 11, "#ff2d55", F(700, 10), 18);
+    if (s.sick) pillC(x, "болеет", cx[1] + 20 + w, Y + 11, IMG.kid, F(700, 10), 18);
     tx(x, fN(cc.h) + (cc.ot ? ` (+${fN(cc.ot)})` : ""), cx[2], Y + 25, F(600, 13.5), cc.done ? IMG.tx : IMG.mu, "right");
     tx(x, fM(cc.sum), cx[3], Y + 25, F(700, 13.5), IMG.tx, "right");
   });
@@ -919,7 +927,7 @@ function imgPay(pm, ref){
   const Yt = y + 8 + sumRows.length * 40; x.fillStyle = IMG.sep; x.fillRect(32, Yt, IMG.W - 64, 1);
   tx(x, "Начислено", 32, Yt + 32, F(800, 17), IMG.tx); tx(x, fH(A.h), 330, Yt + 32, F(600, 14), IMG.mu, "right"); tx(x, fM(A.sum), IMG.W - 32, Yt + 32, F(800, 19), IMG.tx, "right");
   y += sh2 + 16;
-  const g = x.createLinearGradient(16, y, IMG.W - 16, y + 128); g.addColorStop(0, "#ff5f7e"); g.addColorStop(1, "#ff375f");
+  const g = x.createLinearGradient(16, y, IMG.W - 16, y + 128); g.addColorStop(0, IMG.g1); g.addColorStop(1, IMG.g2);
   rr(x, 16, y, IMG.W - 32, 128, 16, g);
   tx(x, "Выплачено за период", 32, y + 30, F(500, 14), "rgba(255,255,255,.85)"); tx(x, fM(A.paid), IMG.W - 32, y + 30, F(700, 15), "#fff", "right");
   tx(x, "Всего выплачено", 32, y + 54, F(500, 14), "rgba(255,255,255,.85)"); tx(x, fM(B.paid), IMG.W - 32, y + 54, F(700, 15), "#fff", "right");
@@ -927,7 +935,7 @@ function imgPay(pm, ref){
   tx(x, B.due >= 0 ? "Остаток к выплате" : "Выплачено наперёд", 32, y + 106, F(700, 16), "#fff"); tx(x, fM(Math.abs(B.due)), IMG.W - 32, y + 108, F(800, 26), "#fff", "right");
   footer(x, h); return c;
 }
-function imgMake(s){ return s.kind === "week" ? imgWeek(s.ref) : s.kind === "month" ? imgMonth(s.ref) : imgPay(s.pm, s.ref); }
+function imgMake(s){ imgTheme(); return s.kind === "week" ? imgWeek(s.ref) : s.kind === "month" ? imgMonth(s.ref) : imgPay(s.pm, s.ref); }
 function imgName(s){ const n = (D.settings.name || "nanny").replace(/[^\p{L}\p{N}]+/gu, "_"); return s.kind === "week" ? `grafik_${n}_${weekStart(s.ref)}.png` : s.kind === "month" ? `grafik_${n}_${s.ref.slice(0, 7)}.png` : `zarplata_${n}_${s.pm === "week" ? weekStart(s.ref) : s.ref.slice(0, 7)}.png`; }
 function imgRefresh(){
   if (!SH || SH.type !== "img") return;
