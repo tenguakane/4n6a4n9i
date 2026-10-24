@@ -278,10 +278,17 @@ function plural(n, a, b, c){ n = Math.abs(n) % 100; const k = n % 10; if (n > 10
 
 /* числа */
 const r2 = x => Math.round(x * 100) / 100;
-const fH = h => `${r2(h).toLocaleString("ru-RU")} ч`;
-const fN = h => r2(h).toLocaleString("ru-RU");
+const r4 = x => Math.round(x * 1e4) / 1e4;
+// Часы показываем часами и минутами: 50 мин, 8 ч, 1 ч 50 мин.
+const fH = h => { const t = Math.round(hNum(h) * 60), a = Math.abs(t), hh = Math.floor(a / 60), mm = a % 60, sg = t < 0 ? "−" : "";
+  return sg + (hh && mm ? `${hh} ч ${mm} мин` : hh ? `${hh} ч` : `${mm} мин`); };
+// В полях ввода: целые и половинки — числом (8, 8,5), остальное — как время (0:50).
+const fN = h => { const t = Math.round(hNum(h) * 60); return t % 30 === 0 ? (t / 60).toLocaleString("ru-RU") : `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`; };
 const fM = x => `${Math.round(x).toLocaleString("ru-RU")} ${D?.settings?.cur || "₴"}`;
 const num = v => { const n = parseFloat(String(v).replace(",", ".")); return isFinite(n) ? n : 0; };
+// Часы можно вводить и дробью (0,5), и как время (0:50 = 50 минут).
+const hNum = v => { const t = String(v ?? "").trim(), m = t.match(/^(\d+)\s*[:.ч]\s*(\d{1,2})\s*(мин)?$/i);
+  if (m && (t.includes(":") || /ч/i.test(t))) return +m[1] + Math.min(59, +m[2]) / 60; return num(t); };
 
 /* =================== данные =================== */
 const SKEY = "nanny.session.v1";
@@ -388,11 +395,11 @@ const PAYK = { advance: "Аванс", salary: "Зарплата" };
 const hShort = t => { const [h, m] = t.split(":"); return m === "00" ? String(+h) : `${+h}:${m}`; };
 const sLabel = s => s.kind === "custom" ? `${s.start}–${s.end}` : KIND[s.kind];
 const sShort = s => s.kind === "custom" ? `${hShort(s.start)}–${hShort(s.end)}` : s.kind === "day" ? "Дн" : "Веч";
-function spanHours(a, b){ if (!a || !b) return 0; const [h1, m1] = a.split(":").map(Number), [h2, m2] = b.split(":").map(Number); let m = h2 * 60 + m2 - (h1 * 60 + m1); if (m <= 0) m += 1440; return Math.round(m / 15) / 4; }
-const hrs = s => s.actual != null && s.actual !== "" ? +s.actual : +s.norm || 0;
+function spanHours(a, b){ if (!a || !b) return 0; const [h1, m1] = a.split(":").map(Number), [h2, m2] = b.split(":").map(Number); let m = h2 * 60 + m2 - (h1 * 60 + m1); if (m <= 0) m += 1440; return r4(m / 60); }
+const hrs = s => s.actual != null && s.actual !== "" ? hNum(s.actual) : hNum(s.norm);
 function calc(s){
-  const r = s.rates || D.settings.rates, h = hrs(s), n = +s.norm || 0;
-  const reg = Math.min(h, n), ot = Math.max(0, r2(h - n));
+  const r = s.rates || D.settings.rates, h = hrs(s), n = hNum(s.norm);
+  const reg = Math.min(h, n), ot = Math.max(0, r4(h - n));
   const regRate = s.sick ? +r.sick : +r.base, otRate = s.sick ? Math.max(+r.over, +r.sick) : +r.over;
   return { h, reg, ot, regRate, otRate, regSum: reg * regRate, otSum: ot * otRate, sum: reg * regRate + ot * otRate, done: s.actual != null && s.actual !== "" };
 }
@@ -482,8 +489,8 @@ function vShifts(){
     h += `<div class="grp">
       <div class="row"><span class="lb">Дата</span><input class="val" type="date" data-bind="form.date" value="${f.date}"></div>
       <div class="row" style="display:block;padding:10px 16px">${seg("form.kind", [["day", "Дневная"], ["evening", "Вечерняя"], ["custom", "По часам"]], f.kind, "segr")}</div>
-      ${f.kind === "custom" ? `<div class="row"><span class="lb">Начало</span><input class="val" type="time" step="900" data-bind="form.start" data-rr="1" value="${f.start}"></div>
-      <div class="row"><span class="lb">Конец</span><input class="val" type="time" step="900" data-bind="form.end" data-rr="1" value="${f.end}"></div>` : ""}
+      ${f.kind === "custom" ? `<div class="row"><span class="lb">Начало</span><input class="val" type="time" step="60" data-bind="form.start" data-rr="1" value="${f.start}"></div>
+      <div class="row"><span class="lb">Конец</span><input class="val" type="time" step="60" data-bind="form.end" data-rr="1" value="${f.end}"></div>` : ""}
       <div class="row"><span class="lb">Норма часов<small>${f.kind === "custom" ? "по указанному времени" : "без точного времени, меняется в «Ещё»"}</small></span><span class="val num">${normTxt}</span></div>
       <div class="row"><span class="lb">Ребёнок болеет<small>ставка ${fM(D.settings.rates.sick)}/ч</small></span>${sw("form.sick", f.sick)}</div>
       <div class="row"><input class="full" placeholder="Заметка (необязательно)" data-bind="form.note" value="${esc(f.note)}"></div>
@@ -547,7 +554,7 @@ function vCal(){
   if (!sh.length && !of.length) h += `<div class="empty">Смен нет</div>`;
   h += sh.map(s => { const c = calc(s); return `<div class="row tap ind" data-act="${isMgr() ? "editShift" : "viewShift"}" data-id="${s.id}">
       <span class="ico" style="background:${KCOL[s.kind]}">${s.kind === "custom" ? "Ч" : s.kind === "day" ? "Д" : "В"}</span>
-      <span class="lb">${esc(sLabel(s))}${s.sick ? ` <span class="badge">болеет</span>` : ""}<small>${c.done ? `Отработано ${fH(c.h)} из ${fH(s.norm)}${c.ot ? ` · переработка ${fH(c.ot)}` : c.h < s.norm ? ` · недоработка ${fH(s.norm - c.h)}` : ""}` : `Норма ${fH(s.norm)}${s.date <= today() ? " · итог не указан" : ""}`}</small></span>
+      <span class="lb">${esc(sLabel(s))}${s.sick ? ` <span class="badge">болеет</span>` : ""}<small>${c.done ? `Отработано ${fH(c.h)} из ${fH(s.norm)}${c.ot ? ` · переработка ${fH(c.ot)}` : c.h < hNum(s.norm) ? ` · недоработка ${fH(hNum(s.norm) - c.h)}` : ""}` : `Норма ${fH(s.norm)}${s.date <= today() ? " · итог не указан" : ""}`}</small></span>
       <span class="val num">${fM(c.sum)}</span><span class="chev">›</span></div>`; }).join("");
   h += of.map(offRow).join("") + `</div>`;
   if (isMgr()) h += `<div class="spacer"></div><div class="btns"><button class="btn sec" data-act="quickShift">＋ Смена</button><button class="btn gray" data-act="quickOff">＋ Выходной…</button></div>`;
@@ -766,13 +773,13 @@ const SHEETS = {
     return `<div class="grp">
       <div class="row"><span class="lb">Дата</span><input class="val" type="date" data-bind="sh.x.date" value="${x.date}"></div>
       <div class="row" style="display:block;padding:10px 16px">${seg("sh.x.kind", [["day", "Дневная"], ["evening", "Вечерняя"], ["custom", "По часам"]], x.kind, "sseg")}</div>
-      ${x.kind === "custom" ? `<div class="row"><span class="lb">Начало</span><input class="val" type="time" step="900" data-bind="sh.x.start" data-rs="1" value="${x.start || "09:00"}"></div>
-        <div class="row"><span class="lb">Конец</span><input class="val" type="time" step="900" data-bind="sh.x.end" data-rs="1" value="${x.end || "18:00"}"></div>` : ""}
+      ${x.kind === "custom" ? `<div class="row"><span class="lb">Начало</span><input class="val" type="time" step="60" data-bind="sh.x.start" data-rs="1" value="${x.start || "09:00"}"></div>
+        <div class="row"><span class="lb">Конец</span><input class="val" type="time" step="60" data-bind="sh.x.end" data-rs="1" value="${x.end || "18:00"}"></div>` : ""}
       <div class="row"><span class="lb">Норма часов<small>${x.kind === "custom" ? "по времени смены" : `обычно ${fH(x.kind === "day" ? n.day : n.evening)}`}</small></span>
         <div class="stepper"><button data-act="step" data-b="norm" data-v="-0.5">−</button><input type="text" inputmode="decimal" data-bind="sh.x.norm" data-rs="1" data-n="1" value="${fN(x.norm)}"><button data-act="step" data-b="norm" data-v="0.5">+</button></div></div>
       <div class="row"><span class="lb">Ребёнок болеет</span><label class="sw"><input type="checkbox" data-bind="sh.x.sick" data-rs="1" ${x.sick ? "checked" : ""}><i></i></label></div></div>
       <div class="gh">Итог смены</div><div class="grp">
-      <div class="row"><span class="lb">Фактически отработано<small>${hasAct ? (c.ot ? `переработка ${fH(c.ot)}` : c.h < x.norm ? `недоработка ${fH(x.norm - c.h)}` : "ровно по норме") : "пока не указано — считается по норме"}</small></span>
+      <div class="row"><span class="lb">Фактически отработано<small>${hasAct ? (c.ot ? `переработка ${fH(c.ot)}` : c.h < hNum(x.norm) ? `недоработка ${fH(hNum(x.norm) - c.h)}` : "ровно по норме") : "пока не указано — считается по норме"}</small></span>
         <div class="stepper"><button data-act="step" data-b="actual" data-v="-0.5">−</button><input type="text" inputmode="decimal" data-bind="sh.x.actual" data-rs="1" data-n="1" placeholder="—" value="${hasAct ? fN(x.actual) : ""}"><button data-act="step" data-b="actual" data-v="0.5">+</button></div></div>
       <div class="row"><button class="btn sm sec" data-act="actNorm">Как по норме</button>${hasAct ? `<button class="btn sm gray" data-act="actClear">Очистить</button>` : ""}</div></div>
       <div class="gh">Оплата смены</div><div class="grp">
@@ -947,9 +954,9 @@ function imgRefresh(){
 /* =================== действия =================== */
 function newShift(date){ const f = UI.form, n = D.settings.norms; return { date: date || f.date, kind: f.kind, start: f.start, end: f.end, norm: f.kind === "custom" ? spanHours(f.start, f.end) : f.kind === "day" ? +n.day : +n.evening, actual: null, sick: !!f.sick, note: f.note.trim(), rates: { ...D.settings.rates }, at: Date.now() }; }
 function cleanShift(x){
-  const o = { date: x.date, kind: x.kind, norm: r2(num(x.norm)), sick: !!x.sick, note: String(x.note || "").trim(), rates: { base: num(x.rates.base), over: num(x.rates.over), sick: num(x.rates.sick) }, at: x.at || Date.now() };
+  const o = { date: x.date, kind: x.kind, norm: r4(hNum(x.norm)), sick: !!x.sick, note: String(x.note || "").trim(), rates: { base: num(x.rates.base), over: num(x.rates.over), sick: num(x.rates.sick) }, at: x.at || Date.now() };
   if (x.kind === "custom") { o.start = x.start || "09:00"; o.end = x.end || "18:00"; }
-  if (x.actual != null && x.actual !== "") o.actual = r2(Math.max(0, num(x.actual)));
+  if (x.actual != null && x.actual !== "") o.actual = r4(Math.max(0, hNum(x.actual)));
   return o;
 }
 function openShift(id, date){
@@ -978,19 +985,19 @@ const ACT = {
     write(`off/${rid()}`, { kind: o.kind, from: o.from, to, note: o.note.trim(), at: Date.now() }); vib();
     toast(`${OFF[o.kind]}: ${rangeLabel(o.from, to)}`); o.note = ""; render(true);
   },
-  asNorm(el, e){ e.stopPropagation(); const s = D.shifts[el.dataset.id]; write(`shifts/${el.dataset.id}`, { ...s, actual: +s.norm }); vib(); toast("Итог: как по норме"); render(true); },
+  asNorm(el, e){ e.stopPropagation(); const s = D.shifts[el.dataset.id]; write(`shifts/${el.dataset.id}`, { ...s, actual: hNum(s.norm) }); vib(); toast("Итог: как по норме"); render(true); },
   editShift(el){ openShift(el.dataset.id); },
   viewShift(el){ openShift(el.dataset.id); },
   quickShift(){ UI.form.date = UI.sel; openShift(null, UI.sel); },
   quickOff(){ openSheet({ type: "off", x: { kind: "weekend", from: UI.sel, to: UI.sel, note: "" }, title: "Новое отсутствие", right: "Готово", rightAct: "saveOff" }); },
   editOff(el){ openSheet({ type: "off", id: el.dataset.id, x: { ...D.off[el.dataset.id] }, title: OFF[D.off[el.dataset.id].kind], right: "Готово", rightAct: "saveOff" }); },
-  step(el){ const k = el.dataset.b, x = SH.x; let v = x[k] == null || x[k] === "" ? +x.norm : num(x[k]); v = Math.max(0, r2(v + +el.dataset.v)); x[k] = v; renderSheet(); },
-  actNorm(){ SH.x.actual = +SH.x.norm; renderSheet(); },
+  step(el){ const k = el.dataset.b, x = SH.x; let v = x[k] == null || x[k] === "" ? hNum(x.norm) : hNum(x[k]); v = Math.max(0, r4(v + +el.dataset.v)); x[k] = v; renderSheet(); },
+  actNorm(){ SH.x.actual = hNum(SH.x.norm); renderSheet(); },
   actClear(){ SH.x.actual = null; renderSheet(); },
   saveShift(){
     const x = SH.x; if (!x.date) return toast("Укажите дату");
     if (x.kind === "custom") { const n = spanHours(x.start, x.end); if (!SH.normTouched) x.norm = n; }
-    if (!(num(x.norm) > 0)) return toast("Норма часов должна быть больше нуля");
+    if (!(hNum(x.norm) > 0)) return toast("Норма часов должна быть больше нуля");
     write(`shifts/${SH.id || rid()}`, cleanShift(x)); vib(); toast(SH.id ? "Смена сохранена" : "Смена добавлена"); UI.sel = x.date; closeSheet(); render(true);
   },
   delShift(){ if (!confirm("Удалить эту смену?")) return; write(`shifts/${SH.id}`, null); toast("Смена удалена"); closeSheet(); render(true); },
