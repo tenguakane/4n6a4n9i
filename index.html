@@ -396,6 +396,16 @@ const hShort = t => { const [h, m] = t.split(":"); return m === "00" ? String(+h
 const sLabel = s => s.kind === "custom" ? `${s.start}–${s.end}` : KIND[s.kind];
 const sShort = s => s.kind === "custom" ? `${hShort(s.start)}–${hShort(s.end)}` : s.kind === "day" ? "Дн" : "Веч";
 function spanHours(a, b){ if (!a || !b) return 0; const [h1, m1] = a.split(":").map(Number), [h2, m2] = b.split(":").map(Number); let m = h2 * 60 + m2 - (h1 * 60 + m1); if (m <= 0) m += 1440; return r4(m / 60); }
+// Смены «по часам», сохранённые старой версией, где длительность округлялась до 15 минут (50 мин → 0,75 ч),
+// пересчитываются по точному времени. Если норму меняли вручную, она не трогается.
+function fixShift(s){
+  if (!s || s.kind !== "custom" || !s.start || !s.end) return s;
+  const [h1, m1] = s.start.split(":").map(Number), [h2, m2] = s.end.split(":").map(Number);
+  let m = h2 * 60 + m2 - (h1 * 60 + m1); if (m <= 0) m += 1440;
+  const exact = r4(m / 60), old = Math.round(m / 15) / 4, same = v => v != null && v !== "" && Math.abs(hNum(v) - old) < 1e-6;
+  if (exact === old || !same(s.norm)) return s;
+  const o = { ...s, norm: exact }; if (same(s.actual)) o.actual = exact; return o;
+}
 const hrs = s => s.actual != null && s.actual !== "" ? hNum(s.actual) : hNum(s.norm);
 function calc(s){
   const r = s.rates || D.settings.rates, h = hrs(s), n = hNum(s.norm);
@@ -403,7 +413,7 @@ function calc(s){
   const regRate = s.sick ? +r.sick : +r.base, otRate = s.sick ? Math.max(+r.over, +r.sick) : +r.over;
   return { h, reg, ot, regRate, otRate, regSum: reg * regRate, otSum: ot * otRate, sum: reg * regRate + ot * otRate, done: s.actual != null && s.actual !== "" };
 }
-const shiftsArr = () => Object.entries(D.shifts).map(([id, s]) => ({ id, ...s })).sort((a, b) => a.date.localeCompare(b.date) || (a.start || "").localeCompare(b.start || ""));
+const shiftsArr = () => Object.entries(D.shifts).map(([id, s]) => ({ id, ...fixShift(s) })).sort((a, b) => a.date.localeCompare(b.date) || (a.start || "").localeCompare(b.start || ""));
 const offArr = () => Object.entries(D.off).map(([id, o]) => ({ id, ...o })).sort((a, b) => a.from.localeCompare(b.from));
 const paysArr = () => Object.entries(D.pays).map(([id, p]) => ({ id, ...p })).sort((a, b) => b.date.localeCompare(a.date) || (b.at || 0) - (a.at || 0));
 const shiftsOn = d => shiftsArr().filter(s => s.date === d);
@@ -633,6 +643,7 @@ function themePicker(){
 }
 
 /* ---------- Ещё ---------- */
+const APP_VER = "2026.10.24 · точные минуты";
 const PWA = { deferred: null, standalone: () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true,
   ios: /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1), web: /^https?:$/.test(location.protocol) };
 function installBlock(){
@@ -689,6 +700,7 @@ function vMore(){
       <div class="row tap" data-act="impJson"><span class="lb link">Восстановить из копии</span></div></div>`;
   }
   h += `<div class="spacer"></div><div class="grp"><div class="row tap" data-act="logout"><span class="lb danger" style="text-align:center">Выйти</span></div></div>
+    <div class="gf" style="text-align:center">Версия ${APP_VER}</div>
     <div class="gf" style="text-align:center;padding-top:14px">Смены няни · ${cloudOn() ? "пространство " + esc(S.room.slice(0, 6)) : "локально"}</div>`;
   return h;
 }
@@ -960,7 +972,7 @@ function cleanShift(x){
   return o;
 }
 function openShift(id, date){
-  const base = id ? JSON.parse(JSON.stringify(D.shifts[id])) : newShift(date);
+  const base = id ? fixShift(JSON.parse(JSON.stringify(D.shifts[id]))) : newShift(date);
   base.rates = Object.assign({ ...D.settings.rates }, base.rates || {});
   if (!base.start) base.start = "09:00"; if (!base.end) base.end = "18:00";
   openSheet({ type: "shift", id, x: base, title: isMgr() ? (id ? "Смена" : "Новая смена") : "Смена", left: isMgr() ? "Отмена" : "Закрыть", right: isMgr() ? "Готово" : "", rightAct: "saveShift" });
@@ -985,7 +997,7 @@ const ACT = {
     write(`off/${rid()}`, { kind: o.kind, from: o.from, to, note: o.note.trim(), at: Date.now() }); vib();
     toast(`${OFF[o.kind]}: ${rangeLabel(o.from, to)}`); o.note = ""; render(true);
   },
-  asNorm(el, e){ e.stopPropagation(); const s = D.shifts[el.dataset.id]; write(`shifts/${el.dataset.id}`, { ...s, actual: hNum(s.norm) }); vib(); toast("Итог: как по норме"); render(true); },
+  asNorm(el, e){ e.stopPropagation(); const s = fixShift(D.shifts[el.dataset.id]); write(`shifts/${el.dataset.id}`, { ...s, actual: hNum(s.norm) }); vib(); toast("Итог: как по норме"); render(true); },
   editShift(el){ openShift(el.dataset.id); },
   viewShift(el){ openShift(el.dataset.id); },
   quickShift(){ UI.form.date = UI.sel; openShift(null, UI.sel); },
@@ -1154,7 +1166,7 @@ $("#fileImp").addEventListener("change", async e => {
 /* =================== PWA =================== */
 if (PWA.web) {
   if (!document.querySelector('link[rel="manifest"]')) { const l = document.createElement("link"); l.rel = "manifest"; l.href = "manifest.webmanifest"; document.head.appendChild(l); }
-  if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(r => r.update()).catch(() => {}));
 }
 addEventListener("beforeinstallprompt", e => { e.preventDefault(); PWA.deferred = e; if (UI.tab === "more") render(true); });
 addEventListener("appinstalled", () => { PWA.deferred = null; toast("Приложение установлено"); if (UI.tab === "more") render(true); });
