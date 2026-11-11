@@ -509,11 +509,27 @@ function fixShift(s){
 // Шкала дня 0–24 ч для смен «по часам»: у дневной и вечерней смены точного времени нет, поэтому шкалы у них нет
 const stripSegs = s => { const [h1, m1] = s.start.split(":").map(Number), [h2, m2] = s.end.split(":").map(Number), a = h1 * 60 + m1, b = h2 * 60 + m2; return b > a ? [[a, b]] : [[a, 1440], [0, b]]; };
 const strip = s => { if (s.kind !== "custom" || !s.start || !s.end) return "";
-  const [h2, m2] = s.end.split(":").map(Number), e = h2 * 60 + m2, ot = calc(s).ot;
-  const over = ot > 0 && e > 0 ? `<i class="ot" style="left:${(e / 14.4).toFixed(2)}%;width:${((Math.min(1440, e + ot * 60) - e) / 14.4).toFixed(2)}%"></i>` : "";
-  return `<span class="strip" style="--k:${KCOL[s.kind]}" role="img" aria-label="с ${s.start} до ${s.end}${ot > 0 ? `, сверх плана ${fH(ot)}` : ""}"><b style="left:25%"></b><b style="left:50%"></b><b style="left:75%"></b>${stripSegs(s).map(([a, b]) => `<i style="left:${(a / 14.4).toFixed(2)}%;width:${((b - a) / 14.4).toFixed(2)}%"></i>`).join("")}${over}</span>`; };
+  const toM = t => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+  const c = calc(s), timed = c.extra > 0 && s.extraFrom && s.extraTo, plain = timed ? r4(c.ot - c.extra) : c.ot, e = toM(s.end);
+  const seg = (a, b) => b > a ? `<i class="ot" style="left:${(a / 14.4).toFixed(2)}%;width:${((b - a) / 14.4).toFixed(2)}%"></i>` : "";
+  let over = plain > 0 && e > 0 ? seg(e, Math.min(1440, e + plain * 60)) : "";
+  if (timed) { const a = toM(s.extraFrom), b = toM(s.extraTo); over += b > a ? seg(a, b) : seg(a, 1440) + seg(0, b); }
+  return `<span class="strip" style="--k:${KCOL[s.kind]}" role="img" aria-label="с ${s.start} до ${s.end}${c.ot > 0 ? `, сверх плана ${fH(c.ot)}` : ""}"><b style="left:25%"></b><b style="left:50%"></b><b style="left:75%"></b>${stripSegs(s).map(([a, b]) => `<i style="left:${(a / 14.4).toFixed(2)}%;width:${((b - a) / 14.4).toFixed(2)}%"></i>`).join("")}${over}</span>`; };
 // Дописанные часы (s.extra): няня задержалась сверх плана. Они всегда идут по ставке переработки.
 const extraH = s => hNum(s.extra) > 0 ? hNum(s.extra) : 0;
+// Время дописанных часов: «с 14:00 до 15:00» даёт 1 ч. Часы и время держатся в согласии друг с другом.
+const extraSpan = (a, b) => a && b && a !== b ? spanHours(a, b) : 0;
+const addMin = (t, m) => { const [h, mi] = t.split(":").map(Number), v = (((h * 60 + mi + Math.round(m)) % 1440) + 1440) % 1440; return String(Math.floor(v / 60)).padStart(2, "0") + ":" + String(v % 60).padStart(2, "0"); };
+function syncExtra(x, k){
+  const open = () => { if (x.actual == null || x.actual === "") x.actual = hNum(x.norm); };
+  if (k === "extraFrom" || k === "extraTo") {
+    if (x.extraFrom && x.extraTo) { x.extra = extraSpan(x.extraFrom, x.extraTo); if (x.extra > 0) open(); }
+  } else if (k === "extra") {
+    const e = extraH(x);
+    if (e > 0) { open(); if (!x.extraFrom && x.kind === "custom" && x.end) x.extraFrom = x.end; }
+    if (x.extraFrom) x.extraTo = addMin(x.extraFrom, e * 60);
+  }
+}
 const baseH = s => s.actual != null && s.actual !== "" ? hNum(s.actual) : hNum(s.norm);
 const hrs = s => r4(baseH(s) + extraH(s));
 // Обычная ставка: часы в пределах плана смены. Ставка переработки: всё, что сверх плана (отработанное сверх нормы + дописанные часы).
@@ -925,12 +941,12 @@ const SHEETS = {
         <div class="row"><span class="lb">Смена</span><span class="val">${esc(sLabel(x))}</span></div>
         <div class="row"><span class="lb">Норма</span><span class="val num">${fH(x.norm)}</span></div>
         <div class="row"><span class="lb">Отработано</span><span class="val num">${c.done ? fH(c.h) : "не указано"}</span></div>
-        ${c.extra ? `<div class="row"><span class="lb">Дописано сверх плана</span><span class="val num">${fH(c.extra)}</span></div>` : ""}
+        ${c.extra ? `<div class="row"><span class="lb">Дописано сверх плана</span><span class="val num">${x.extraFrom && x.extraTo ? `${x.extraFrom}–${x.extraTo} · ` : ""}${fH(c.extra)}</span></div>` : ""}
         ${x.sick ? `<div class="row"><span class="lb">Ребёнок болел</span><span class="val">да</span></div>` : ""}
         ${x.note ? `<div class="row"><span class="lb">Заметка</span><span class="val" style="white-space:normal">${esc(x.note)}</span></div>` : ""}</div>
         <div class="gh">Оплата</div><div class="grp">
         <div class="row"><span class="lb">${x.sick ? "По ставке «болеет»" : "Обычные часы"}<small>${fH(c.reg)} × ${fM(c.regRate)}</small></span><span class="val num">${fM(c.regSum)}</span></div>
-        ${c.ot ? `<div class="row"><span class="lb">Переработка<small>${fH(c.ot)} × ${fM(c.otRate)}${c.extra ? ` · из них дописано ${fH(c.extra)}` : ""}</small></span><span class="val num">${fM(c.otSum)}</span></div>` : ""}
+        ${c.ot ? `<div class="row"><span class="lb">Переработка<small>${fH(c.ot)} × ${fM(c.otRate)}${c.extra ? ` · из них дописано ${fH(c.extra)}${x.extraFrom && x.extraTo ? ` (${x.extraFrom}–${x.extraTo})` : ""}` : ""}</small></span><span class="val num">${fM(c.otSum)}</span></div>` : ""}
         <div class="row"><span class="lb"><b>Итого</b></span><span class="val num" style="color:var(--tx);font-weight:600">${fM(c.sum)}</span></div></div>`;
     }
     const c = calc(x), hasAct = x.actual != null && x.actual !== "";
@@ -946,14 +962,16 @@ const SHEETS = {
       <div class="row"><span class="lb">Фактически отработано<small>${hasAct ? (c.ot ? `переработка ${fH(c.ot)}` : c.h < hNum(x.norm) ? `недоработка ${fH(hNum(x.norm) - c.h)}` : "ровно по норме") : "пока не указано — считается по норме"}</small></span>
         <div class="stepper"><button data-act="step" data-b="actual" data-v="-0.5">−</button><input type="text" inputmode="decimal" data-bind="sh.x.actual" data-rs="1" data-n="1" placeholder="—" value="${hasAct ? fN(x.actual) : ""}"><button data-act="step" data-b="actual" data-v="0.5">+</button></div></div>
       <div class="row"><button class="btn sm sec" data-act="actNorm">Как по норме</button>${hasAct ? `<button class="btn sm gray" data-act="actClear">Очистить</button>` : ""}</div></div>
-      <div class="gh">Дописать часы</div><div class="grp">
-      <div class="row"><span class="lb">Задержалась сверх плана<small>${c.extra ? `дописано ${fH(c.extra)}, всё по ставке переработки` : "добавьте, сколько часов она осталась сверх плана"}</small></span>
+      <div class="gh">Дописать время</div><div class="grp">
+      <div class="row"><span class="lb">Начало</span><input class="val" type="time" step="60" data-bind="sh.x.extraFrom" data-rs="1" value="${x.extraFrom || ""}"></div>
+      <div class="row"><span class="lb">Конец</span><input class="val" type="time" step="60" data-bind="sh.x.extraTo" data-rs="1" value="${x.extraTo || ""}"></div>
+      <div class="row"><span class="lb">Всего дописано<small>${c.extra ? "всё по ставке переработки" : "сверх плана смены"}</small></span>
         <div class="stepper"><button data-act="step" data-b="extra" data-v="-0.5">−</button><input type="text" inputmode="decimal" data-bind="sh.x.extra" data-rs="1" data-n="1" placeholder="0" value="${c.extra ? fN(c.extra) : ""}"><button data-act="step" data-b="extra" data-v="0.5">+</button></div></div>
-      <div class="row"><button class="btn sm sec" data-act="addExtra" data-v="0.5">+30 мин</button><button class="btn sm sec" data-act="addExtra" data-v="1">+1 ч</button><button class="btn sm sec" data-act="addExtra" data-v="2">+2 ч</button>${c.extra ? `<button class="btn sm gray" data-act="extraClear">Сбросить</button>` : ""}</div></div>
-      <div class="gf">Часы по плану идут по обычной ставке. Всё, что сверх плана, и фактическая переработка, и дописанные часы, по ставке переработки.</div>
+      <div class="row" style="gap:8px;flex-wrap:nowrap"><button class="btn sm sec" style="white-space:nowrap;padding-inline:10px" data-act="addExtra" data-v="0.5">+30 мин</button><button class="btn sm sec" style="white-space:nowrap;padding-inline:10px" data-act="addExtra" data-v="1">+1 ч</button><button class="btn sm sec" style="white-space:nowrap;padding-inline:10px" data-act="addExtra" data-v="2">+2 ч</button>${c.extra ? `<button class="btn sm gray" style="white-space:nowrap;padding-inline:10px" data-act="extraClear">Сбросить</button>` : ""}</div></div>
+      <div class="gf">Укажите, когда няня осталась сверх плана, или добавьте часы кнопками. Часы по плану идут по обычной ставке, всё сверх плана по ставке переработки.</div>
       <div class="gh">Оплата смены</div><div class="grp">
       <div class="row"><span class="lb">${x.sick ? "По ставке «болеет»" : "Обычные часы"}<small>${fH(c.reg)} × ${fM(c.regRate)}</small></span><span class="val num">${fM(c.regSum)}</span></div>
-      ${c.ot ? `<div class="row"><span class="lb">Переработка<small>${fH(c.ot)} × ${fM(c.otRate)}${c.extra ? ` · из них дописано ${fH(c.extra)}` : ""}</small></span><span class="val num">${fM(c.otSum)}</span></div>` : ""}
+      ${c.ot ? `<div class="row"><span class="lb">Переработка<small>${fH(c.ot)} × ${fM(c.otRate)}${c.extra ? ` · из них дописано ${fH(c.extra)}${x.extraFrom && x.extraTo ? ` (${x.extraFrom}–${x.extraTo})` : ""}` : ""}</small></span><span class="val num">${fM(c.otSum)}</span></div>` : ""}
       <div class="row"><span class="lb"><b>Итого</b></span><span class="val num" style="color:var(--tx);font-weight:600">${fM(c.sum)}</span></div></div>
       <details class="help" style="margin-top:16px"><summary>Ставки этой смены</summary><div class="grp" style="margin-top:10px;background:var(--card2)">
         <div class="row"><span class="lb">Обычная</span><input class="val num" type="number" inputmode="decimal" data-bind="sh.x.rates.base" data-rs="1" data-n="1" value="${x.rates.base}"></div>
@@ -1126,7 +1144,7 @@ function cleanShift(x){
   const o = { date: x.date, kind: x.kind, norm: r4(hNum(x.norm)), sick: !!x.sick, note: String(x.note || "").trim(), rates: { base: num(x.rates.base), over: num(x.rates.over), sick: num(x.rates.sick) }, at: x.at || Date.now() };
   if (x.kind === "custom") { o.start = x.start || "09:00"; o.end = x.end || "18:00"; }
   if (x.actual != null && x.actual !== "") o.actual = r4(Math.max(0, hNum(x.actual)));
-  if (hNum(x.extra) > 0) o.extra = r4(hNum(x.extra));
+  if (hNum(x.extra) > 0) { o.extra = r4(hNum(x.extra)); if (x.extraFrom && x.extraTo) { o.extraFrom = x.extraFrom; o.extraTo = x.extraTo; } }
   return o;
 }
 function openShift(id, date){
@@ -1163,11 +1181,11 @@ const ACT = {
   quickOff(){ openSheet({ type: "off", x: { kind: "weekend", from: UI.sel, to: UI.sel, note: "" }, title: "Новое отсутствие", right: "Готово", rightAct: "saveOff" }); },
   editOff(el){ openSheet({ type: "off", id: el.dataset.id, x: { ...D.off[el.dataset.id] }, title: OFF[D.off[el.dataset.id].kind], right: "Готово", rightAct: "saveOff" }); },
   step(el){ const k = el.dataset.b, x = SH.x; let v = x[k] == null || x[k] === "" ? (k === "extra" ? 0 : hNum(x.norm)) : hNum(x[k]); v = Math.max(0, r4(v + +el.dataset.v)); x[k] = v;
-    if (k === "extra" && v > 0 && (x.actual == null || x.actual === "")) x.actual = hNum(x.norm); renderSheet(); },
-  addExtra(el){ const x = SH.x; x.extra = r4(extraH(x) + +el.dataset.v); if (x.actual == null || x.actual === "") x.actual = hNum(x.norm); vib(); renderSheet(); },
-  extraClear(){ SH.x.extra = 0; renderSheet(); },
+    if (k === "extra") syncExtra(x, "extra"); renderSheet(); },
+  addExtra(el){ const x = SH.x; x.extra = r4(extraH(x) + +el.dataset.v); syncExtra(x, "extra"); vib(); renderSheet(); },
+  extraClear(){ const x = SH.x; x.extra = 0; x.extraFrom = ""; x.extraTo = ""; renderSheet(); },
   actNorm(){ SH.x.actual = hNum(SH.x.norm); renderSheet(); },
-  actClear(){ SH.x.actual = null; SH.x.extra = 0; renderSheet(); },
+  actClear(){ const x = SH.x; x.actual = null; x.extra = 0; x.extraFrom = ""; x.extraTo = ""; renderSheet(); },
   saveShift(){
     const x = SH.x; if (!x.date) return toast("Укажите дату");
     if (x.kind === "custom") { const n = spanHours(x.start, x.end); if (!SH.normTouched) x.norm = n; }
@@ -1294,6 +1312,7 @@ document.addEventListener("input", e => {
     if (el.dataset.n) v = v === "" ? (el.dataset.bind.endsWith("actual") ? null : v) : String(v).replace(",", ".");
     setBind(el.dataset.bind, v);
     if (el.dataset.bind === "sh.x.norm") SH.normTouched = true;
+    if (SH && SH.type === "shift") { const m = el.dataset.bind.match(/^sh\.x\.(extra|extraFrom|extraTo)$/); if (m) syncExtra(SH.x, m[1]); }
     if (SH && SH.type === "shift" && (el.dataset.bind === "sh.x.start" || el.dataset.bind === "sh.x.end") && !SH.normTouched) SH.x.norm = spanHours(SH.x.start, SH.x.end);
     if (el.type === "checkbox" && el.dataset.rr) render(true);
     if (el.type === "checkbox" && el.dataset.rs) renderSheet();
