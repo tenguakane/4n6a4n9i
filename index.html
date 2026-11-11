@@ -16,208 +16,304 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
 :root{
+  --ease:cubic-bezier(.22,1,.36,1);
+  --onacc:#fff;
   --bg:#f2f2f7;--card:#fff;--card2:#f2f2f7;--fill:rgba(118,118,128,.12);--fill2:rgba(118,118,128,.2);
-  --tx:#000;--tx2:rgba(60,60,67,.6);--tx3:rgba(60,60,67,.3);--sep:rgba(60,60,67,.18);
-  --acc:#ff375f;--accS:rgba(255,55,95,.12);
+  --tx:#000;--tx2:rgba(60,60,67,.8);--tx3:rgba(60,60,67,.3);--sep:rgba(60,60,67,.18);
+  --acc:#c71d45;--accBg:var(--acc);--accS:rgba(199,29,69,.1);
   --day:#ff9f0a;--eve:#5e5ce6;--cus:#0a84ff;--wknd:#8e8e93;--sick:#ff3b30;--vac:#34c759;--kid:#ff2d55;
-  --ok:#34c759;--bad:#ff3b30;
-  --bar:rgba(249,249,249,.86);--segOn:#fff;--g1:#ff5f7e;--g2:#ff375f;
+  --ok:#34c759;--bad:#d70015;
+  --bar:rgba(249,249,249,.86);--segOn:#fff;
   --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   color-scheme:light;
 }
 /* ---------- тёмные темы ---------- */
 :root[data-theme="dark"]{
+  --bad:#ff6961;
   --bg:#000;--card:#1c1c1e;--card2:#2c2c2e;--fill:rgba(118,118,128,.24);--fill2:rgba(118,118,128,.36);
   --tx:#fff;--tx2:rgba(235,235,245,.6);--tx3:rgba(235,235,245,.3);--sep:rgba(84,84,88,.55);
-  --acc:#ff375f;--accS:rgba(255,55,95,.2);--bar:rgba(22,22,24,.86);--segOn:#636366;--g1:#ff5f7e;--g2:#ff375f;color-scheme:dark;
+  --acc:#ff6a89;--accBg:#d9244d;--accS:rgba(255,106,137,.14);--bar:rgba(22,22,24,.86);--segOn:#636366;--bad:#ff6961;color-scheme:dark;
 }
 :root[data-theme="graphite"]{
   --bg:#111214;--card:#1d1f23;--card2:#282b31;--fill:rgba(140,150,170,.16);--fill2:rgba(140,150,170,.28);
   --tx:#f2f4f7;--tx2:rgba(220,226,236,.6);--tx3:rgba(220,226,236,.3);--sep:rgba(140,150,170,.2);
-  --acc:#2ec4b6;--accS:rgba(46,196,182,.18);--bar:rgba(22,24,28,.88);--segOn:#3a3e46;--g1:#2ec4b6;--g2:#1a8f9c;color-scheme:dark;
+  --acc:#2ec4b6;--accS:rgba(46,196,182,.18);--bar:rgba(22,24,28,.88);--segOn:#3a3e46;color-scheme:dark;
+  --onacc:#04211e;--bad:#ff7b72;
 }
 :root[data-theme="midnight"]{
   --bg:#070b17;--card:#111a2e;--card2:#1a2542;--fill:rgba(120,150,230,.15);--fill2:rgba(120,150,230,.26);
   --tx:#eef3ff;--tx2:rgba(210,222,255,.6);--tx3:rgba(210,222,255,.3);--sep:rgba(120,150,230,.2);
-  --acc:#4f8cff;--accS:rgba(79,140,255,.2);--bar:rgba(10,16,32,.88);--segOn:#2a3a63;--g1:#4f8cff;--g2:#6a5cff;color-scheme:dark;
+  --acc:#6aa0ff;--accBg:#2f6be0;--accS:rgba(106,160,255,.2);--bar:rgba(10,16,32,.88);--segOn:#2a3a63;--bad:#ff6961;color-scheme:dark;
 }
 :root[data-theme="violet"]{
   --bg:#0e0919;--card:#1a1230;--card2:#251a42;--fill:rgba(167,139,250,.14);--fill2:rgba(167,139,250,.25);
   --tx:#f4f0ff;--tx2:rgba(226,216,255,.62);--tx3:rgba(226,216,255,.32);--sep:rgba(167,139,250,.2);
-  --acc:#9d7bff;--accS:rgba(157,123,255,.2);--bar:rgba(17,11,33,.88);--segOn:#3d2d68;--g1:#8b5cf6;--g2:#c026d3;color-scheme:dark;
+  --acc:#b29bff;--accBg:#7340e8;--accS:rgba(178,155,255,.2);--bar:rgba(17,11,33,.88);--segOn:#3d2d68;--bad:#ff6961;color-scheme:dark;
   --eve:#bf5af2;
 }
 :root[data-theme="fox"]{
   --bg:#130c07;--card:#21150d;--card2:#2d1d12;--fill:rgba(255,159,69,.12);--fill2:rgba(255,159,69,.22);
   --tx:#fff4ea;--tx2:rgba(255,228,205,.62);--tx3:rgba(255,228,205,.3);--sep:rgba(255,159,69,.17);
-  --acc:#ff8a2a;--accS:rgba(255,138,42,.18);--bar:rgba(25,16,9,.9);--segOn:#4a2f1c;--g1:#ffb056;--g2:#f0602a;color-scheme:dark;
-  --day:#ffc23d;
+  --acc:#ff8a2a;--accS:rgba(255,138,42,.18);--bar:rgba(25,16,9,.9);--segOn:#4a2f1c;color-scheme:dark;
+  --day:#ffc23d;--cus:#4d84cc;--eve:#8f8ae6;--onacc:#1f1006;--bad:#ff7b72;
 }
-:root:not([data-theme="light"]) .seg button.on{box-shadow:0 3px 8px rgba(0,0,0,.35)}
+:root:not([data-theme="light"]):not([data-theme="mint"]):not([data-theme="sand"]):not([data-theme="sky"]) .seg button.on{box-shadow:0 1px 3px rgba(0,0,0,.4)}
+
+/* ---------- светлые темы ---------- */
+:root[data-theme="mint"]{
+  --bg:#e9f3ee;--card:#fff;--card2:#f1f7f4;--fill:rgba(50,110,85,.12);--fill2:rgba(50,110,85,.2);
+  --tx:#0b1f17;--tx2:rgba(14,40,30,.8);--tx3:rgba(14,40,30,.3);--sep:rgba(14,60,40,.16);
+  --acc:#0b6e50;--accS:rgba(11,110,80,.12);--bar:rgba(243,250,246,.88);--segOn:#fff;--bad:#c4121f;color-scheme:light;
+}
+:root[data-theme="sand"]{
+  --bg:#f4eee4;--card:#fffbf5;--card2:#f7f0e4;--fill:rgba(120,85,40,.12);--fill2:rgba(120,85,40,.2);
+  --tx:#24190d;--tx2:rgba(50,34,16,.8);--tx3:rgba(50,34,16,.3);--sep:rgba(90,60,20,.18);
+  --acc:#a8400a;--accS:rgba(168,64,10,.12);--bar:rgba(250,245,236,.88);--segOn:#fff;--bad:#c4121f;color-scheme:light;
+}
+:root[data-theme="sky"]{
+  --bg:#e8f0fa;--card:#fff;--card2:#f0f5fc;--fill:rgba(55,95,160,.12);--fill2:rgba(55,95,160,.2);
+  --tx:#0c1a2e;--tx2:rgba(14,30,56,.8);--tx3:rgba(14,30,56,.3);--sep:rgba(30,60,120,.16);
+  --acc:#1252c0;--accS:rgba(18,82,192,.1);--bar:rgba(242,247,253,.88);--segOn:#fff;--bad:#c4121f;color-scheme:light;
+  --cus:#0a6fd6;
+}
+/* ---------- новые тёмные темы ---------- */
+:root[data-theme="forest"]{
+  --bg:#08130e;--card:#10211a;--card2:#182e25;--fill:rgba(110,200,150,.14);--fill2:rgba(110,200,150,.26);
+  --tx:#eaf8ef;--tx2:rgba(214,240,224,.7);--tx3:rgba(214,240,224,.3);--sep:rgba(110,200,150,.2);
+  --acc:#52d68a;--accS:rgba(82,214,138,.18);--bar:rgba(9,20,15,.88);--segOn:#2c4a3b;--onacc:#052412;
+  --onico:#08140e;--day:#f6c945;--eve:#9aa5ff;--cus:#5ab8ff;--vac:#46d68a;--sick:#ff7066;--wknd:#a0aea6;--kid:#ff7a9a;--bad:#ff7b72;color-scheme:dark;
+}
+:root[data-theme="cherry"]{
+  --bg:#15070d;--card:#231019;--card2:#301723;--fill:rgba(255,120,150,.13);--fill2:rgba(255,120,150,.25);
+  --tx:#fff0f4;--tx2:rgba(255,215,225,.7);--tx3:rgba(255,215,225,.3);--sep:rgba(255,120,150,.2);
+  --acc:#ff7094;--accBg:#cf2a56;--accS:rgba(255,112,148,.2);--bar:rgba(24,8,14,.9);--segOn:#4a2230;--bad:#ff7b72;color-scheme:dark;
+  --day:#ffb020;
+}
+:root[data-theme="contrast"]{
+  --bg:#000;--card:#0c0c0c;--card2:#1a1a1a;--fill:rgba(255,255,255,.16);--fill2:rgba(255,255,255,.3);
+  --tx:#fff;--tx2:rgba(255,255,255,.84);--tx3:rgba(255,255,255,.45);--sep:rgba(255,255,255,.4);
+  --acc:#ffd60a;--accS:rgba(255,214,10,.2);--bar:rgba(0,0,0,.95);--segOn:#3a3a3a;--onacc:#000;
+  --onico:#000;--day:#ff9f0a;--eve:#aaa8ff;--cus:#4db8ff;--vac:#4cff8a;--sick:#ff6b61;--wknd:#c7c7cc;--kid:#ff6bb0;--bad:#ff8a80;color-scheme:dark;
+}
 :root[data-theme="fox"] body{background:radial-gradient(700px 420px at 100% -8%,rgba(255,138,42,.16),transparent 70%),var(--bg) fixed}
-:root[data-theme="violet"] body{background:radial-gradient(700px 420px at 100% -8%,rgba(157,123,255,.2),transparent 70%),var(--bg) fixed}
-:root[data-theme="midnight"] body{background:radial-gradient(700px 420px at 100% -8%,rgba(79,140,255,.16),transparent 70%),var(--bg) fixed}
-:root:not([data-theme="light"]){color-scheme:dark}
-:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="cherry"] body{background:radial-gradient(700px 420px at 100% -8%,rgba(255,112,148,.16),transparent 70%),var(--bg) fixed}
+:root:not([data-theme="light"]):not([data-theme="mint"]):not([data-theme="sand"]):not([data-theme="sky"]){color-scheme:dark}
+:root[data-theme="light"],:root[data-theme="mint"],:root[data-theme="sand"],:root[data-theme="sky"]{color-scheme:light}
 
 /* ---------- выбор темы ---------- */
-.themes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px}
-.th{display:flex;flex-direction:column;align-items:center;gap:7px;font-size:13px;font-weight:500;color:var(--tx)}
-.th .pv{position:relative;width:100%;aspect-ratio:1/1.15;border-radius:14px;overflow:hidden;border:2px solid transparent;box-shadow:0 0 0 .5px var(--sep)}
+.themes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:12px}
+.th{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--tx);text-align:center}
+.th .pv{position:relative;width:100%;aspect-ratio:1/1.15;border-radius:12px;overflow:hidden;border:2px solid transparent;box-shadow:0 0 0 .5px var(--sep)}
 .th.on .pv{border-color:var(--acc)}
-.th .pv i{position:absolute;left:12%;right:12%;height:13%;border-radius:5px}
-.th .pv b{position:absolute;left:12%;width:34%;height:9%;border-radius:99px;bottom:12%}
-.th .pv .ck{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:var(--acc);color:#fff;display:none;place-items:center;font-size:12px;font-weight:800}
+.th .pv i{position:absolute;left:12%;right:12%;height:13%;border-radius:4px}
+.th .pv b{position:absolute;left:12%;width:34%;height:8%;border-radius:99px;bottom:12%}
+.th .pv .ck{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;background:var(--accBg);color:var(--onacc,#fff);display:none;place-items:center}
+.th .pv .ck svg{width:12px;height:12px}
 .th.on .pv .ck{display:grid}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--tx);font:17px/1.3 var(--font);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:400 17px/1.3 var(--font);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
 body{min-height:100vh;min-height:100dvh;overscroll-behavior-y:none}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer;border:0;background:none;padding:0}
 input,select,textarea{border:0;background:none;outline:none;min-width:0}
 input[type=date],input[type=time]{-webkit-appearance:none;appearance:none}
+button:focus-visible,[data-act]:focus-visible,summary:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .hidden{display:none!important}
 
 /* ---------- каркас ---------- */
 #view{padding:calc(env(safe-area-inset-top,0px) + 8px) 16px calc(96px + env(safe-area-inset-bottom,0px));max-width:640px;margin:0 auto}
-.lt{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:6px 4px 10px}
+.lt{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:8px 4px 12px}
 .lt>div:first-child{min-width:0;flex:1}.lt .navb{flex:none}
-.lt h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0;font-size:clamp(26px,8vw,34px);line-height:1.15;font-weight:700;letter-spacing:.01em}
-.lt .sub{color:var(--tx2);font-size:15px;margin-top:2px}
-.navb{display:flex;gap:6px;align-items:center}
-.icbtn{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--fill);color:var(--acc)}
+.lt h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0;font-size:28px;line-height:32px;font-weight:600}
+.lt .sub{color:var(--tx2);font-size:15px;line-height:20px;margin-top:4px}
+.navb{display:flex;gap:8px;align-items:center}
+.icbtn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--fill);color:var(--tx)}
 .icbtn svg{width:20px;height:20px}
-.sync{white-space:nowrap;display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--tx2);padding:6px 10px;border-radius:99px;background:var(--fill)}
-.sync i{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.sync{white-space:nowrap;display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--tx2);padding:6px 12px;border-radius:99px;background:var(--fill)}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--ok)}
 .sync[data-s="off"] i{background:var(--tx3)}
 .sync[data-s="err"] i{background:var(--day)}
 .sync[data-s="busy"] i{background:var(--cus);animation:pulse 1s infinite}
 @keyframes pulse{50%{opacity:.3}}
 
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:space-around;background:var(--bar);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--sep);padding:6px 4px calc(4px + env(safe-area-inset-bottom,0px))}
-.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;font-weight:500;color:var(--tx2);padding:2px 0}
-.tabbar button svg{width:26px;height:26px}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:space-around;background:var(--bar);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--sep);padding:8px 4px calc(4px + env(safe-area-inset-bottom,0px))}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:500;color:var(--tx2);padding:4px 0;min-height:48px;justify-content:center}
+.tabbar button svg{width:24px;height:24px}
 .tabbar button.on{color:var(--acc)}
 
 /* ---------- группы и ячейки ---------- */
-.gh{font-size:13px;color:var(--tx2);text-transform:uppercase;letter-spacing:.02em;padding:18px 16px 7px}
-.gf{font-size:13px;color:var(--tx2);padding:7px 16px 0;line-height:1.35}
+.gh{font-size:13px;font-weight:500;color:var(--tx2);padding:24px 16px 8px}
+.gf{font-size:13px;line-height:20px;color:var(--tx2);padding:8px 16px 0}
 .grp{background:var(--card);border-radius:12px;overflow:hidden}
-.row{display:flex;align-items:center;gap:12px;min-height:46px;padding:9px 16px;position:relative}
+.row{display:flex;align-items:center;gap:12px;min-height:48px;padding:8px 16px;position:relative}
 .row+.row::before{content:"";position:absolute;top:0;left:16px;right:0;border-top:.5px solid var(--sep)}
-.row.ind+.row::before,.row+.row.ind::before{left:58px}
+.row.ind+.row::before,.row+.row.ind::before{left:52px}
 .row .lb{flex:1;min-width:0}
-.row .lb small{display:block;color:var(--tx2);font-size:13px;margin-top:1px}
+.row .lb small{display:block;color:var(--tx2);font-size:13px;line-height:20px}
 .row .val{color:var(--tx2);text-align:right;white-space:nowrap}
 .row input.val,.row select.val{color:var(--tx2);text-align:right;flex:0 1 auto;width:auto;max-width:60%}
 .row input.val:focus{color:var(--tx)}
-.row input[type=number].val{width:110px}
+.row input[type=number].val{width:112px}
 .row.tap{cursor:pointer}
 .row.tap:active{background:var(--fill)}
 .chev{color:var(--tx3);font-size:20px;line-height:1;margin-left:-4px}
-.ico{width:30px;height:30px;border-radius:7px;display:grid;place-items:center;color:#fff;flex:none;font-size:15px;font-weight:700}
+.ico{width:24px;height:24px;display:grid;place-items:center;color:var(--tx2);flex:none}
 .ico svg{width:18px;height:18px}
 .full{width:100%}
 .link{color:var(--acc)}
 .danger{color:var(--bad)!important}
 .muted{color:var(--tx2)}
-.spacer{height:14px}
+.spacer{height:16px}
 
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:50px;border-radius:12px;background:var(--acc);color:#fff;font-weight:600;font-size:17px;padding:0 16px}
-.btn:active{opacity:.75}
-.btn.sec{background:var(--accS);color:var(--acc)}
-.btn.gray{background:var(--fill);color:var(--tx)}
-.btn.sm{min-height:36px;width:auto;font-size:15px;border-radius:9px;padding:0 12px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;border-radius:10px;background:var(--accBg);color:var(--onacc,#fff);font-weight:600;font-size:17px;padding:0 16px;transition:transform .12s var(--ease),opacity .12s var(--ease)}
+.btn:active{transform:scale(.98);opacity:.85}
+.btn svg{width:18px;height:18px;flex:none}
+.btn.sec,.btn.gray{background:var(--fill);color:var(--tx)}
+.btn.sm{min-height:40px;width:auto;font-size:15px;border-radius:8px;padding:0 12px}
 .btn[disabled]{opacity:.4;pointer-events:none}
-.btns{display:flex;gap:10px}
+.btns{display:flex;gap:8px}
 .btns>.btn{flex:1}
 
-.seg{display:flex;background:var(--fill);border-radius:9px;padding:2px;gap:2px}
-.seg button{flex:1;min-height:32px;border-radius:7px;font-size:14px;font-weight:500;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.seg button.on{background:var(--segOn);box-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04);font-weight:600}
+.seg{display:flex;background:var(--fill);border-radius:10px;padding:2px;gap:2px}
+.seg button{flex:1;min-height:36px;border-radius:8px;font-size:15px;font-weight:500;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seg button.on{background:var(--segOn);box-shadow:0 1px 3px rgba(0,0,0,.12);font-weight:600}
 .segw{padding:8px 0}
 
-.sw{position:relative;width:51px;height:31px;flex:none}
+.sw{position:relative;width:52px;height:32px;flex:none}
 .sw input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer;z-index:1}
-.sw i{position:absolute;inset:0;border-radius:99px;background:var(--fill2);transition:background .2s}
-.sw i::after{content:"";position:absolute;left:2px;top:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.15),0 3px 1px rgba(0,0,0,.06);transition:transform .2s}
+.sw i{position:absolute;inset:0;border-radius:99px;background:var(--fill2);transition:background .2s var(--ease)}
+.sw i::after{content:"";position:absolute;left:2px;top:2px;width:28px;height:28px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.2);transition:transform .2s var(--ease)}
 .sw input:checked+i{background:var(--ok)}
 .sw input:checked+i::after{transform:translateX(20px)}
 
-.stepper{display:flex;align-items:center;gap:0;background:var(--fill);border-radius:9px;overflow:hidden}
-.stepper button{width:44px;height:34px;font-size:22px;color:var(--tx);display:grid;place-items:center}
+.stepper{display:flex;align-items:center;background:var(--fill);border-radius:8px;overflow:hidden}
+.stepper button{width:44px;height:40px;font-size:20px;color:var(--tx);display:grid;place-items:center}
 .stepper button:active{background:var(--fill2)}
-.stepper input{width:64px;text-align:center;font-weight:600;font-variant-numeric:tabular-nums;border-left:.5px solid var(--sep);border-right:.5px solid var(--sep);height:34px}
+.stepper input{width:64px;text-align:center;font-weight:600;font-variant-numeric:tabular-nums;border-left:.5px solid var(--sep);border-right:.5px solid var(--sep);height:40px}
 
-.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:99px;font-size:13px;font-weight:600;color:#fff;white-space:nowrap}
-.dot{width:10px;height:10px;border-radius:50%;flex:none;display:inline-block}
-.badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--kid);background:color-mix(in srgb,var(--kid) 14%,transparent);padding:2px 7px;border-radius:99px}
-.tag{font-size:12px;font-weight:600;color:var(--day);background:color-mix(in srgb,var(--day) 15%,transparent);padding:2px 7px;border-radius:99px}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:99px;font-size:13px;font-weight:600;color:#fff;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:color-mix(in srgb,var(--kid) 70%,var(--tx));background:color-mix(in srgb,var(--kid) 14%,transparent);padding:2px 8px;border-radius:99px}
+.tag{font-size:12px;font-weight:600;color:color-mix(in srgb,var(--day) 45%,var(--tx));background:color-mix(in srgb,var(--day) 15%,transparent);padding:2px 8px;border-radius:99px}
+
+/* шкала дня 0–24 ч: когда именно няня с ребёнком. Метки на 6, 12 и 18 часах */
+.strip{--k:var(--cus);position:relative;display:block;height:4px;border-radius:2px;overflow:hidden;margin-top:8px;background:color-mix(in srgb,var(--k) 22%,transparent)}
+.strip i{position:absolute;top:0;bottom:0;min-width:4px;border-radius:2px;background:var(--k)}
+.strip b{position:absolute;top:0;bottom:0;width:1px;background:var(--card)}
 
 /* ---------- календарь ---------- */
-.mhead{display:flex;align-items:center;justify-content:space-between;padding:4px 4px 10px}
-.mhead b{font-size:20px;font-weight:700;text-transform:capitalize}
+.mhead{display:flex;align-items:center;justify-content:space-between;padding:4px 4px 12px}
+.mhead b{font-size:20px;font-weight:600;text-transform:capitalize}
 .mnav{display:flex;gap:8px}
-.cal{background:var(--card);border-radius:14px;padding:10px 6px 8px}
-.cal .wd{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:12px;font-weight:600;color:var(--tx2);text-transform:uppercase;padding-bottom:6px}
-.cal .gr{display:grid;grid-template-columns:repeat(7,1fr);row-gap:4px}
-.cd{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 1px 5px;border-radius:10px;min-height:62px;cursor:pointer}
-.cd .n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:17px;font-variant-numeric:tabular-nums}
-.cd.out{opacity:.28}
-.cd.td .n{color:var(--acc);font-weight:700}
-.cd.sel .n{background:var(--acc);color:#fff;font-weight:700}
-.cd .sh{max-width:100%;font-size:10px;font-weight:700;color:#fff;border-radius:5px;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}
-.cd .of{position:absolute;left:3px;right:3px;bottom:2px;height:3px;border-radius:2px}
+.cal{background:var(--card);border-radius:16px;padding:12px 4px}
+.cal .wd{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));text-align:center;font-size:12px;font-weight:500;color:var(--tx2);padding-bottom:8px}
+.cal .gr{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));row-gap:4px}
+.cd{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 2px;border-radius:8px;min-height:64px;min-width:0;cursor:pointer}
+.cd:active{background:var(--fill)}
+.cd .n{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:17px;font-variant-numeric:tabular-nums}
+.cd.out{opacity:.42}
+.cd.td .n{font-weight:600;box-shadow:inset 0 0 0 1.5px var(--tx2)}
+.cd.sel .n{background:var(--accBg);color:var(--onacc,#fff);font-weight:600;box-shadow:none}
+/* плашка смены: тонированный фон и цветная полоска слева */
+.cd .sh{--k:var(--cus);display:block;width:100%;min-width:0;font-size:11px;font-weight:600;line-height:12px;text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;border-radius:4px;padding:2px 2px 2px 4px;
+  color:color-mix(in srgb,var(--k) 50%,var(--tx));background:color-mix(in srgb,var(--k) 22%,var(--card));box-shadow:inset 2px 0 0 var(--k)}
+.cd .sh span{display:block}
+.cd .sh span+span{opacity:.78;font-weight:500}
+.cd .of{position:absolute;left:4px;right:4px;bottom:2px;height:4px;border-radius:2px}
 .cd.off{background:color-mix(in srgb,var(--c) 11%,transparent)}
-.cd .kid{position:absolute;top:3px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--kid)}
-.legend{display:flex;flex-wrap:wrap;gap:6px 14px;padding:12px 6px 0;font-size:13px;color:var(--tx2)}
-.legend span{display:inline-flex;align-items:center;gap:6px}
+.cd .kid{position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--kid)}
+
+/* ---------- календарь: лента недель ---------- */
+.cvw{padding:0 0 12px}
+.wkh{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:16px 4px 8px}
+.wkh b{font-size:17px;font-weight:600;white-space:nowrap}
+.wkh span{font-size:13px;color:var(--tx2);text-align:right;font-variant-numeric:tabular-nums}
+.dr{display:flex;gap:12px;align-items:center;padding:8px 16px 8px 12px;min-height:56px;position:relative}
+.dr+.dr::before{content:"";position:absolute;top:0;left:60px;right:0;border-top:.5px solid var(--sep)}
+.dr.out{opacity:.5}
+.dr .dn{width:36px;flex:none;text-align:center;line-height:16px}
+.dr .dn small{display:block;font-size:11px;font-weight:500;color:var(--tx2)}
+.dr .dn b{display:grid;place-items:center;width:32px;height:32px;margin:0 auto;border-radius:50%;font-size:17px;font-weight:500;font-variant-numeric:tabular-nums}
+.dr.td .dn b{font-weight:600;box-shadow:inset 0 0 0 1.5px var(--tx2)}
+.dr .dc{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.it{--k:var(--cus);display:flex;flex-wrap:wrap;align-items:center;column-gap:8px;min-width:0;border-radius:8px;padding:8px 12px;background:color-mix(in srgb,var(--k) 18%,var(--card));box-shadow:inset 4px 0 0 var(--k)}
+.it .t{font-weight:600;font-size:15px;line-height:20px;white-space:nowrap;color:color-mix(in srgb,var(--k) 45%,var(--tx))}
+.it .s{margin-left:auto;font-size:13px;color:var(--tx2);white-space:nowrap;text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.it .strip{flex:0 0 100%;order:3}
+.it.tap{cursor:pointer}
+.it.tap:active{filter:brightness(1.18)}
+.emr{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px}
+.emr .em{font-size:15px;color:var(--tx2)}
+.add{width:40px;height:40px;border-radius:50%;background:var(--fill);color:var(--tx2);display:grid;place-items:center;flex:none}
+.add svg{width:18px;height:18px}
+.add:active{background:var(--fill2)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin:12px 8px 0;padding-top:12px;border-top:.5px solid var(--sep);font-size:13px;color:var(--tx2)}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+@media (max-width:360px){
+  .cd .n{width:28px;height:28px;font-size:15px}
+  .lt h1{font-size:24px;line-height:28px}
+  .lt{gap:8px}
+  .sync{padding:6px 8px;font-size:12px;gap:4px}
+  .mhead b{font-size:17px;white-space:nowrap}
+  .mnav{gap:4px}
+}
 
 /* ---------- статистика ---------- */
-.kp{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.kp .k{background:var(--card);border-radius:14px;padding:13px 14px}
+.kp{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.kp .k{background:var(--card);border-radius:12px;padding:12px 16px}
 .kp .k span{font-size:13px;color:var(--tx2);font-weight:500}
-.kp .k b{display:block;font-size:26px;font-weight:700;margin-top:3px;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.kp .k b{display:block;font-size:28px;line-height:32px;font-weight:500;margin-top:4px;font-variant-numeric:tabular-nums}
+.kp .k b small{font-size:15px;font-weight:400;color:var(--tx2);margin:0 4px 0 2px}
 .kp .k.wide{grid-column:1/-1}
-.kp .k.acc{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff}
-.kp .k.acc span{color:rgba(255,255,255,.85)}
-.bar3{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--fill);margin-top:10px}
-.bar3 i{display:block;height:100%}
-.pnav{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 2px 0}
-.pnav b{font-size:16px;font-weight:600;text-align:center;flex:1}
+.pnav{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 4px 0}
+.pnav b{font-size:17px;font-weight:500;text-align:center;flex:1}
 .num{font-variant-numeric:tabular-nums}
+/* расчётный листок: единственный «тёплый» объект экрана */
+.slip{--slip:color-mix(in srgb,var(--card) 90%,var(--day));position:relative;background:var(--slip);border-radius:12px 12px 0 0;padding:16px 16px 20px;margin-bottom:20px}
+.slip::after{content:"";position:absolute;left:0;right:0;top:100%;height:8px;background:conic-gradient(from -45deg at bottom,transparent,var(--slip) 1deg 90deg,transparent 91deg) 50%/16px 100%}
+.slip .sl,.slip .tot{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.slip .sl{font-size:15px;line-height:20px;padding:4px 0}
+.slip .sl span{color:var(--tx2)}
+.slip .sl b{font-weight:500;font-variant-numeric:tabular-nums}
+.slip hr{border:0;border-top:1px dashed color-mix(in srgb,var(--tx) 28%,transparent);margin:12px 0}
+.slip .tot span{font-size:15px;font-weight:500}
+.slip .tot b{font-size:28px;line-height:32px;font-weight:600;color:var(--acc);font-variant-numeric:tabular-nums}
 
 /* ---------- шторка ---------- */
 #sheetRoot{position:fixed;inset:0;z-index:50;pointer-events:none}
 #sheetRoot.on{pointer-events:auto}
-.bd{position:absolute;inset:0;background:rgba(0,0,0,.35);opacity:0;transition:opacity .28s}
+.bd{position:absolute;inset:0;background:rgba(0,0,0,.35);opacity:0;transition:opacity .2s var(--ease)}
 #sheetRoot.on .bd{opacity:1}
-.sheet{position:absolute;left:0;right:0;bottom:0;max-height:calc(100% - env(safe-area-inset-top,0px) - 12px);background:var(--bg);border-radius:14px 14px 0 0;transform:translateY(100%);transition:transform .32s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;max-width:640px;margin:0 auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:calc(100% - env(safe-area-inset-top,0px) - 12px);background:var(--bg);border-radius:16px 16px 0 0;transform:translateY(100%);transition:transform .32s var(--ease);display:flex;flex-direction:column;max-width:640px;margin:0 auto}
 #sheetRoot.on .sheet{transform:none}
-.sheet .sh-h{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 8px;position:relative}
-.sheet .sh-h::before{content:"";position:absolute;top:6px;left:50%;width:36px;height:5px;border-radius:3px;background:var(--fill2);transform:translateX(-50%)}
-.sheet .sh-h b{font-size:17px;font-weight:600;position:absolute;left:70px;right:70px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sheet .sh-h button{font-size:17px;color:var(--acc);min-width:60px;text-align:left;padding:6px 0}
-.sheet .sh-h button.r{text-align:right;font-weight:600}
+.sheet .sh-h{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px;position:relative}
+.sheet .sh-h::before{content:"";position:absolute;top:8px;left:50%;width:36px;height:4px;border-radius:2px;background:var(--fill2);transform:translateX(-50%)}
+.sheet .sh-h b{font-size:17px;font-weight:600;position:absolute;left:72px;right:72px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sheet .sh-h button{font-size:17px;color:var(--tx2);min-width:60px;text-align:left;padding:12px 0}
+.sheet .sh-h button.r{text-align:right;font-weight:600;color:var(--acc)}
 .sheet .sh-b{overflow:auto;padding:4px 16px calc(24px + env(safe-area-inset-bottom,0px));-webkit-overflow-scrolling:touch}
 .prev{display:block;width:100%;border-radius:12px;background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.08)}
 
-.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:rgba(30,30,32,.94);color:#fff;font-size:15px;font-weight:500;padding:11px 18px;border-radius:14px;opacity:0;pointer-events:none;transition:all .25s;z-index:80;max-width:calc(100% - 32px);text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);background:rgba(30,30,32,.94);color:#fff;font-size:15px;font-weight:500;padding:12px 20px;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:80;max-width:calc(100% - 32px);text-align:center}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
 /* ---------- вход ---------- */
-.welcome{min-height:calc(100dvh - 40px);display:flex;flex-direction:column;justify-content:center;gap:10px;padding:20px 0}
-.logo{width:96px;height:96px;border-radius:22px;margin:0 auto 6px;box-shadow:0 10px 30px rgba(255,55,95,.3)}
-.welcome h1{text-align:center;font-size:30px;margin:6px 0 0}
-.welcome p.c{text-align:center;color:var(--tx2);margin:4px 12px 18px;font-size:16px}
-.pin{letter-spacing:.4em;font-size:22px!important;text-align:center!important;width:100%!important;max-width:none!important;color:var(--tx)!important}
-details.help{background:var(--card);border-radius:12px;padding:12px 16px;margin-top:10px;font-size:15px}
+.welcome{min-height:calc(100dvh - 40px);display:flex;flex-direction:column;justify-content:center;gap:12px;padding:24px 0}
+.logo{width:96px;height:96px;border-radius:24px;margin:0 auto 8px}
+.welcome h1{text-align:center;font-size:28px;line-height:32px;font-weight:600;margin:8px 0 0}
+.welcome p.c{text-align:center;color:var(--tx2);margin:4px 16px 16px;font-size:15px;line-height:20px}
+.sample{background:var(--card);border-radius:12px;padding:12px 16px}
+.sample .cap{font-size:13px;color:var(--tx2);margin-bottom:8px}
+.sample .sr{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:15px;line-height:20px}
+.sample .sr small{font-size:13px;color:var(--tx2)}
+.pin{letter-spacing:.4em;font-size:20px!important;text-align:center!important;width:100%!important;max-width:none!important;color:var(--tx)!important}
+details.help{background:var(--card);border-radius:12px;padding:12px 16px;margin-top:12px;font-size:15px}
 details.help summary{color:var(--acc);font-weight:500;cursor:pointer;list-style:none}
 details.help summary::-webkit-details-marker{display:none}
-details.help ol{padding-left:20px;margin:10px 0 0;color:var(--tx2)}
-details.help li{margin:6px 0}
-details.help code{font-size:12.5px;background:var(--fill);padding:2px 5px;border-radius:5px;word-break:break-all;color:var(--tx)}
-.empty{text-align:center;color:var(--tx2);padding:22px 16px;font-size:15px}
+details.help ol{padding-left:20px;margin:12px 0 0;color:var(--tx2)}
+details.help li{margin:8px 0}
+details.help code{font-size:12px;background:var(--fill);padding:2px 4px;border-radius:4px;word-break:break-all;color:var(--tx)}
+.empty{text-align:center;color:var(--tx2);padding:24px 16px;font-size:15px}
 </style>
 </head>
 <body>
@@ -282,6 +378,9 @@ const r4 = x => Math.round(x * 1e4) / 1e4;
 // Часы показываем часами и минутами: 50 мин, 8 ч, 1 ч 50 мин.
 const fH = h => { const t = Math.round(hNum(h) * 60), a = Math.abs(t), hh = Math.floor(a / 60), mm = a % 60, sg = t < 0 ? "−" : "";
   return sg + (hh && mm ? `${hh} ч ${mm} мин` : hh ? `${hh} ч` : `${mm} мин`); };
+// В карточках: «28 ч 38 мин», единицы мельче цифр
+const fHx = h => { const t = Math.round(hNum(h) * 60), hh = Math.floor(t / 60), mm = t % 60;
+  return hh && mm ? `${hh}<small>ч</small>${mm}<small>мин</small>` : hh ? `${hh}<small>ч</small>` : `${mm}<small>мин</small>`; };
 // В полях ввода: целые и половинки — числом (8, 8,5), остальное — как время (0:50).
 const fN = h => { const t = Math.round(hNum(h) * 60); return t % 30 === 0 ? (t / 60).toLocaleString("ru-RU") : `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`; };
 const fM = x => `${Math.round(x).toLocaleString("ru-RU")} ${D?.settings?.cur || "₴"}`;
@@ -406,6 +505,9 @@ function fixShift(s){
   if (exact === old || !same(s.norm)) return s;
   const o = { ...s, norm: exact }; if (same(s.actual)) o.actual = exact; return o;
 }
+// Шкала дня 0–24 ч для смен «по часам»: у дневной и вечерней смены точного времени нет, поэтому шкалы у них нет
+const stripSegs = s => { const [h1, m1] = s.start.split(":").map(Number), [h2, m2] = s.end.split(":").map(Number), a = h1 * 60 + m1, b = h2 * 60 + m2; return b > a ? [[a, b]] : [[a, 1440], [0, b]]; };
+const strip = s => s.kind === "custom" && s.start && s.end ? `<span class="strip" style="--k:${KCOL[s.kind]}" role="img" aria-label="с ${s.start} до ${s.end}"><b style="left:25%"></b><b style="left:50%"></b><b style="left:75%"></b>${stripSegs(s).map(([a, b]) => `<i style="left:${(a / 14.4).toFixed(2)}%;width:${((b - a) / 14.4).toFixed(2)}%"></i>`).join("")}</span>` : "";
 const hrs = s => s.actual != null && s.actual !== "" ? hNum(s.actual) : hNum(s.norm);
 function calc(s){
   const r = s.rates || D.settings.rates, h = hrs(s), n = hNum(s.norm);
@@ -447,7 +549,7 @@ function balance(){
 
 /* =================== состояние интерфейса =================== */
 const UI = {
-  tab: "shifts", sub: "shift", cal: monthStart(today()), sel: today(), sm: "month", sref: today(),
+  tab: "shifts", sub: "shift", cv: (() => { try { return localStorage.getItem("nanny.calview") === "list" ? "list" : "grid"; } catch (e) { return "grid"; } })(), cal: monthStart(today()), sel: today(), sm: "month", sref: today(),
   form: { date: today(), kind: "day", start: "09:00", end: "18:00", sick: false, note: "" },
   of: { kind: "weekend", from: today(), to: today(), note: "" },
   scr: "welcome", jn: { link: "", role: "nanny", pin: "", err: "", data: null, url: "", room: "" },
@@ -457,15 +559,23 @@ let SH = null; // состояние открытой шторки
 
 /* =================== иконки =================== */
 const IC = {
-  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 7.5v9M7.5 12h9"/></svg>',
-  cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r=".9" fill="currentColor"/><circle cx="12" cy="14.5" r=".9" fill="currentColor"/><circle cx="15.5" cy="14.5" r=".9" fill="currentColor"/></svg>',
-  stat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V12M10 20V5M15 20v-9M20 20v-5"/></svg>',
-  more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><circle cx="7.8" cy="12" r=".6" fill="currentColor"/><circle cx="12" cy="12" r=".6" fill="currentColor"/><circle cx="16.2" cy="12" r=".6" fill="currentColor"/></svg>',
-  share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3.5M7.5 8 12 3.5 16.5 8"/><path d="M7 11H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-1"/></svg>',
-  l: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
-  r: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 7.5v9M7.5 12h9"/></svg>',
+  cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r=".9" fill="currentColor"/><circle cx="12" cy="14.5" r=".9" fill="currentColor"/><circle cx="15.5" cy="14.5" r=".9" fill="currentColor"/></svg>',
+  stat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 20V12M10 20V5M15 20v-9M20 20v-5"/></svg>',
+  more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><circle cx="7.8" cy="12" r=".6" fill="currentColor"/><circle cx="12" cy="12" r=".6" fill="currentColor"/><circle cx="16.2" cy="12" r=".6" fill="currentColor"/></svg>',
+  share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3.5M7.5 8 12 3.5 16.5 8"/><path d="M7 11H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-1"/></svg>',
+  l: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  r: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
   cloud: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 19a5 5 0 0 1-.6-9.96A6.5 6.5 0 0 1 19 9.6 4.75 4.75 0 0 1 18 19z"/></svg>',
-  coin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 4v16M16 7.5c0-1.5-1.8-2.5-4-2.5s-4 1-4 3 2 2.6 4 3 4 1.2 4 3.2-1.8 2.8-4 2.8-4-1-4-2.5"/></svg>'
+  coin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 4v16M16 7.5c0-1.5-1.8-2.5-4-2.5s-4 1-4 3 2 2.6 4 3 4 1.2 4 3.2-1.8 2.8-4 2.8-4-1-4-2.5"/></svg>',
+  add: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>',
+  heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5l-7.2-7.3A4.9 4.9 0 0 1 12 6.4a4.9 4.9 0 0 1 7.2 6.8z"/></svg>',
+  sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/></svg>',
+  moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg>',
+  cloudL: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18.5a4.5 4.5 0 0 1-.4-9A6 6 0 0 1 18 9.8a4.4 4.4 0 0 1-.5 8.7z"/></svg>'
 };
 
 /* =================== отрисовка =================== */
@@ -498,7 +608,7 @@ function vShifts(){
   if (UI.sub === "shift") {
     h += `<div class="grp">
       <div class="row"><span class="lb">Дата</span><input class="val" type="date" data-bind="form.date" value="${f.date}"></div>
-      <div class="row" style="display:block;padding:10px 16px">${seg("form.kind", [["day", "Дневная"], ["evening", "Вечерняя"], ["custom", "По часам"]], f.kind, "segr")}</div>
+      <div class="row" style="display:block;padding:8px 16px">${seg("form.kind", [["day", "Дневная"], ["evening", "Вечерняя"], ["custom", "По часам"]], f.kind, "segr")}</div>
       ${f.kind === "custom" ? `<div class="row"><span class="lb">Начало</span><input class="val" type="time" step="60" data-bind="form.start" data-rr="1" value="${f.start}"></div>
       <div class="row"><span class="lb">Конец</span><input class="val" type="time" step="60" data-bind="form.end" data-rr="1" value="${f.end}"></div>` : ""}
       <div class="row"><span class="lb">Норма часов<small>${f.kind === "custom" ? "по указанному времени" : "без точного времени, меняется в «Ещё»"}</small></span><span class="val num">${normTxt}</span></div>
@@ -507,7 +617,7 @@ function vShifts(){
     </div><div class="spacer"></div><button class="btn" data-act="addShift">Добавить смену</button>`;
   } else {
     h += `<div class="grp">
-      <div class="row" style="display:block;padding:10px 16px">${seg("of.kind", [["weekend", "Выходной"], ["sick", "Больничный"], ["vacation", "Отпуск"]], o.kind, "segr")}</div>
+      <div class="row" style="display:block;padding:8px 16px">${seg("of.kind", [["weekend", "Выходной"], ["sick", "Больничный"], ["vacation", "Отпуск"]], o.kind, "segr")}</div>
       <div class="row"><span class="lb">С</span><input class="val" type="date" data-bind="of.from" data-rr="1" value="${o.from}"></div>
       <div class="row"><span class="lb">По</span><input class="val" type="date" data-bind="of.to" value="${o.to}" min="${o.from}"></div>
       <div class="row"><input class="full" placeholder="Заметка (необязательно)" data-bind="of.note" value="${esc(o.note)}"></div>
@@ -517,7 +627,7 @@ function vShifts(){
   const open = all.filter(s => s.date <= t && (s.actual == null || s.actual === "")).slice(-20).reverse();
   if (open.length) {
     h += `<div class="gh">Укажите итог часов</div><div class="grp">${open.map(s => `<div class="row tap ind" data-act="editShift" data-id="${s.id}">
-      <span class="ico" style="background:${KCOL[s.kind]}">${s.kind === "custom" ? "Ч" : s.kind === "day" ? "Д" : "В"}</span>
+      <span class="ico"><i class="dot" style="background:${KCOL[s.kind]}"></i></span>
       <span class="lb">${dLong(s.date)}, ${WD[wdi(s.date)].toLowerCase()}<small>${esc(sLabel(s))} · норма ${fH(s.norm)}${s.sick ? " · ребёнок болел" : ""}</small></span>
       <button class="btn sm sec" data-act="asNorm" data-id="${s.id}">По норме</button></div>`).join("")}</div>
       <div class="gf">«По норме» ставит фактические часы равными норме. Нажмите на смену, чтобы указать недоработку или переработку.</div>`;
@@ -531,18 +641,20 @@ function vShifts(){
 function shiftRow(s){
   const c = calc(s);
   return `<div class="row tap ind" data-act="editShift" data-id="${s.id}">
-    <span class="ico" style="background:${KCOL[s.kind]}">${s.kind === "custom" ? "Ч" : s.kind === "day" ? "Д" : "В"}</span>
+    <span class="ico"><i class="dot" style="background:${KCOL[s.kind]}"></i></span>
     <span class="lb">${cap(WDL[wdi(s.date)])}, ${dLong(s.date)}<small>${esc(sLabel(s))} · ${c.done ? `отработано ${fH(c.h)}` : `норма ${fH(s.norm)}`}${s.note ? " · " + esc(s.note) : ""}</small></span>
     ${s.sick ? `<span class="badge">болеет</span>` : ""}<span class="val num">${fM(c.sum)}</span><span class="chev">›</span></div>`;
 }
 function offRow(o){
   const days = Math.round((pd(o.to) - pd(o.from)) / 864e5) + 1;
   return `<div class="row ${isMgr() ? "tap" : ""} ind" ${isMgr() ? `data-act="editOff" data-id="${o.id}"` : ""}>
-    <span class="ico" style="background:${OCOL[o.kind]}">${o.kind === "weekend" ? "В" : o.kind === "sick" ? "Б" : "О"}</span>
+    <span class="ico"><i class="dot" style="background:${OCOL[o.kind]}"></i></span>
     <span class="lb">${OFF[o.kind]}<small>${rangeLabel(o.from, o.to)} · ${days} ${plural(days, "день", "дня", "дней")}${o.note ? " · " + esc(o.note) : ""}</small></span>${isMgr() ? `<span class="chev">›</span>` : ""}</div>`;
 }
 
 /* ---------- Календарь ---------- */
+// В ячейке узкой сетки время «по часам» ставим в две строки: начало над концом
+const chipTxt = s => s.kind === "custom" && s.start && s.end ? `<span>${hShort(s.start)}</span><span>${hShort(s.end)}</span>` : esc(sShort(s));
 function vCal(){
   const m = UI.cal, first = monthStart(m), start = weekStart(first), last = monthEnd(m), t = today();
   const end = addDays(weekStart(last), 6);
@@ -551,11 +663,14 @@ function vCal(){
     const sh = shiftsOn(d), of = offOn(d), o = of[0];
     const cls = ["cd", d.slice(0, 7) !== m.slice(0, 7) ? "out" : "", d === t ? "td" : "", d === UI.sel ? "sel" : "", o ? "off" : ""].join(" ");
     cells += `<div class="${cls}" data-act="day" data-v="${d}" ${o ? `style="--c:${OCOL[o.kind]}"` : ""}><span class="n">${pd(d).getDate()}</span>
-      ${sh.slice(0, 2).map(s => `<span class="sh" style="background:${KCOL[s.kind]}">${esc(sShort(s))}</span>`).join("")}
+      ${sh.slice(0, 2).map(s => `<span class="sh" style="--k:${KCOL[s.kind]}">${chipTxt(s)}</span>`).join("")}
       ${o ? `<span class="of" style="background:${OCOL[o.kind]}"></span>` : ""}${sh.some(s => s.sick) ? `<span class="kid"></span>` : ""}</div>`;
   }
-  let h = lt(isMgr() ? "Календарь" : "Мои смены", isMgr() ? esc(D.settings.name) : "", `${syncPill()}<button class="icbtn" data-act="export" data-v="month" aria-label="Картинка">${IC.share}</button>`);
+  let h = lt(isMgr() ? "Календарь" : "Мои смены", isMgr() ? esc(D.settings.name) : "", `${syncPill()}<button class="icbtn" data-act="export" data-v="month" aria-label="Поделиться картинкой">${IC.share}</button>`);
   h += `<div class="mhead"><b>${monthTitle(m)}</b><div class="mnav"><button class="icbtn" data-act="mon" data-v="-1" aria-label="Назад">${IC.l}</button><button class="icbtn" data-act="mon" data-v="0" aria-label="Сегодня" style="width:auto;padding:0 12px;border-radius:99px;font-size:15px;font-weight:600">Сегодня</button><button class="icbtn" data-act="mon" data-v="1" aria-label="Вперёд">${IC.r}</button></div></div>`;
+  h += `<div class="segw cvw">${seg("cv", [["grid", "Сетка"], ["list", "Лента недель"]], UI.cv, "segr")}</div>`;
+  if (UI.cv === "list") h += vRibbon(m);
+  else {
   h += `<div class="cal"><div class="wd">${WD.map(w => `<span>${w}</span>`).join("")}</div><div class="gr">${cells}</div>
     <div class="legend"><span><i class="dot" style="background:var(--day)"></i>Дневная</span><span><i class="dot" style="background:var(--eve)"></i>Вечерняя</span><span><i class="dot" style="background:var(--cus)"></i>По часам</span><span><i class="dot" style="background:var(--wknd)"></i>Выходной</span><span><i class="dot" style="background:var(--sick)"></i>Больничный</span><span><i class="dot" style="background:var(--vac)"></i>Отпуск</span><span><i class="dot" style="background:var(--kid)"></i>Ребёнок болеет</span></div></div>`;
   // выбранный день
@@ -563,11 +678,12 @@ function vCal(){
   h += `<div class="gh">${cap(WDL[wdi(d)])}, ${dLong(d)}</div><div class="grp">`;
   if (!sh.length && !of.length) h += `<div class="empty">Смен нет</div>`;
   h += sh.map(s => { const c = calc(s); return `<div class="row tap ind" data-act="${isMgr() ? "editShift" : "viewShift"}" data-id="${s.id}">
-      <span class="ico" style="background:${KCOL[s.kind]}">${s.kind === "custom" ? "Ч" : s.kind === "day" ? "Д" : "В"}</span>
-      <span class="lb">${esc(sLabel(s))}${s.sick ? ` <span class="badge">болеет</span>` : ""}<small>${c.done ? `Отработано ${fH(c.h)} из ${fH(s.norm)}${c.ot ? ` · переработка ${fH(c.ot)}` : c.h < hNum(s.norm) ? ` · недоработка ${fH(hNum(s.norm) - c.h)}` : ""}` : `Норма ${fH(s.norm)}${s.date <= today() ? " · итог не указан" : ""}`}</small></span>
+      <span class="ico"><i class="dot" style="background:${KCOL[s.kind]}"></i></span>
+      <span class="lb">${esc(sLabel(s))}${s.sick ? ` <span class="badge">болеет</span>` : ""}<small>${c.done ? `Отработано ${fH(c.h)} из ${fH(s.norm)}${c.ot ? ` · переработка ${fH(c.ot)}` : c.h < hNum(s.norm) ? ` · недоработка ${fH(hNum(s.norm) - c.h)}` : ""}` : `Норма ${fH(s.norm)}${s.date <= today() ? " · итог не указан" : ""}`}</small>${strip(s)}</span>
       <span class="val num">${fM(c.sum)}</span><span class="chev">›</span></div>`; }).join("");
   h += of.map(offRow).join("") + `</div>`;
-  if (isMgr()) h += `<div class="spacer"></div><div class="btns"><button class="btn sec" data-act="quickShift">＋ Смена</button><button class="btn gray" data-act="quickOff">＋ Выходной…</button></div>`;
+  if (isMgr()) h += `<div class="spacer"></div><div class="btns"><button class="btn sec" data-act="quickShift">${IC.add}Смена</button><button class="btn gray" data-act="quickOff">${IC.add}Выходной</button></div>`;
+  }
   // итоги месяца
   const A = agg(period("month", m));
   h += `<div class="gh">Итоги за ${MON[pd(m).getMonth()]}</div><div class="grp">
@@ -575,7 +691,27 @@ function vCal(){
     <div class="row"><span class="lb">Часов</span><span class="val num">${fH(A.h)}</span></div>
     <div class="row"><span class="lb">Начислено</span><span class="val num">${fM(A.sum)}</span></div>
     ${A.planN ? `<div class="row"><span class="lb">Ещё запланировано</span><span class="val num">${A.planN} · ${fH(A.planH)}</span></div>` : ""}</div>`;
-  h += `<div class="spacer"></div><div class="btns"><button class="btn gray" data-act="export" data-v="week">Картинка: неделя</button><button class="btn gray" data-act="export" data-v="month">Картинка: месяц</button></div>`;
+  h += `<div class="spacer"></div><div class="btns"><button class="btn gray" data-act="export" data-v="week">График недели картинкой</button><button class="btn gray" data-act="export" data-v="month">График месяца картинкой</button></div>`;
+  return h;
+}
+
+/* ---------- Календарь: лента недель ---------- */
+function vRibbon(m){
+  const start = weekStart(monthStart(m)), end = addDays(weekStart(monthEnd(m)), 6), t = today();
+  let h = "";
+  for (let w = start; w <= end; w = addDays(w, 7)) {
+    const we = addDays(w, 6), A = agg(period("week", w)), cnt = A.n + A.planN;
+    h += `<div class="wkh"><b>${rangeLabel(w, we)}</b><span>${cnt ? `${cnt} ${plural(cnt, "смена", "смены", "смен")} · ${fH(A.h + A.planH)}${A.sum ? " · " + fM(A.sum) : ""}` : "без смен"}</span></div><div class="grp">`;
+    for (let d = w; d <= we; d = addDays(d, 1)) {
+      const sh = shiftsOn(d), of = offOn(d), out = d.slice(0, 7) !== m.slice(0, 7);
+      let items = sh.map(s => { const c = calc(s);
+        return `<div class="it tap" style="--k:${KCOL[s.kind]}" data-act="${isMgr() ? "editShift" : "viewShift"}" data-id="${s.id}"><span class="t">${esc(sLabel(s))}</span>${s.sick ? `<span class="badge">болеет</span>` : ""}<span class="s num">${c.done ? fH(c.h) : fH(s.norm)} · ${fM(c.sum)}</span>${strip(s)}</div>`; }).join("");
+      items += of.map(o => `<div class="it ${isMgr() ? "tap" : ""}" style="--k:${OCOL[o.kind]}" ${isMgr() ? `data-act="editOff" data-id="${o.id}"` : ""}><span class="t">${OFF[o.kind]}</span>${o.note ? `<span class="s">${esc(o.note)}</span>` : ""}</div>`).join("");
+      if (!items) items = `<div class="emr"><span class="em">Нет смен</span>${isMgr() ? `<button class="add" data-act="dayAdd" data-v="${d}" aria-label="Добавить смену на ${dLong(d)}">${IC.add}</button>` : ""}</div>`;
+      h += `<div class="dr${d === t ? " td" : ""}${out ? " out" : ""}"><div class="dn"><small>${WD[wdi(d)]}</small><b>${pd(d).getDate()}</b></div><div class="dc">${items}</div></div>`;
+    }
+    h += `</div>`;
+  }
   return h;
 }
 
@@ -587,14 +723,13 @@ function vStat(){
   h += seg("sm", [["week", "Неделя"], ["month", "Месяц"], ["all", "Всё время"]], UI.sm, "segr");
   if (UI.sm !== "all") h += `<div class="pnav"><button class="icbtn" data-act="per" data-v="-1">${IC.l}</button><b>${p.label}</b><button class="icbtn" data-act="per" data-v="1">${IC.r}</button></div>`;
   h += `<div class="spacer"></div><div class="kp">
-    <div class="k wide acc"><span>Начислено${UI.sm === "all" ? "" : " за период"}</span><b class="num">${fM(A.sum)}</b>
-      <div class="bar3"><i style="width:${A.regSum / tot * 100}%;background:#fff"></i><i style="width:${A.otSum / tot * 100}%;background:rgba(255,255,255,.6)"></i><i style="width:${A.sickSum / tot * 100}%;background:rgba(255,255,255,.32)"></i></div></div>
-    <div class="k"><span>Часов</span><b class="num">${fN(A.h)}</b></div>
+    <div class="k wide"><span>Начислено${UI.sm === "all" ? "" : " за период"}</span><b class="num">${fM(A.sum)}</b></div>
+    <div class="k"><span>Часов</span><b class="num">${fHx(A.h)}</b></div>
     <div class="k"><span>Смен</span><b class="num">${A.n}</b></div></div>`;
   h += `<div class="gh">По тарифам</div><div class="grp">
-    <div class="row"><span class="ico" style="background:var(--acc)">₴</span><span class="lb">Обычные часы<small>${fH(A.reg)} · ${fM(D.settings.rates.base)}/ч</small></span><span class="val num">${fM(A.regSum)}</span></div>
-    <div class="row"><span class="ico" style="background:#ff9f0a">+</span><span class="lb">Переработка<small>${fH(A.ot)} · ${fM(D.settings.rates.over)}/ч</small></span><span class="val num">${fM(A.otSum)}</span></div>
-    <div class="row"><span class="ico" style="background:#af52de">♥</span><span class="lb">Ребёнок болел<small>${fH(A.sickH)} · ${fM(D.settings.rates.sick)}/ч</small></span><span class="val num">${fM(A.sickSum)}</span></div></div>`;
+    <div class="row"><span class="ico">${IC.clock}</span><span class="lb">Обычные часы<small>${fH(A.reg)} · ${fM(D.settings.rates.base)}/ч</small></span><span class="val num">${fM(A.regSum)}</span></div>
+    <div class="row"><span class="ico">${IC.up}</span><span class="lb">Переработка<small>${fH(A.ot)} · ${fM(D.settings.rates.over)}/ч</small></span><span class="val num">${fM(A.otSum)}</span></div>
+    <div class="row"><span class="ico">${IC.heart}</span><span class="lb">Ребёнок болел<small>${fH(A.sickH)} · ${fM(D.settings.rates.sick)}/ч</small></span><span class="val num">${fM(A.sickSum)}</span></div></div>`;
   if (A.open) h += `<div class="gf">${A.open} ${plural(A.open, "смена", "смены", "смен")} без итога — посчитаны по норме.</div>`;
   const od = A.offDays;
   if (od.weekend || od.sick || od.vacation || A.planN) h += `<div class="gh">Ещё за период</div><div class="grp">
@@ -602,28 +737,35 @@ function vStat(){
     ${od.weekend ? `<div class="row"><span class="lb">Выходные</span><span class="val num">${od.weekend} ${plural(od.weekend, "день", "дня", "дней")}</span></div>` : ""}
     ${od.sick ? `<div class="row"><span class="lb">Больничный</span><span class="val num">${od.sick} ${plural(od.sick, "день", "дня", "дней")}</span></div>` : ""}
     ${od.vacation ? `<div class="row"><span class="lb">Отпуск</span><span class="val num">${od.vacation} ${plural(od.vacation, "день", "дня", "дней")}</span></div>` : ""}</div>`;
-  h += `<div class="gh">Расчёт</div><div class="kp">
-    <div class="k"><span>Начислено всего</span><b class="num" style="font-size:21px">${fM(B.earned)}</b></div>
-    <div class="k"><span>Выплачено</span><b class="num" style="font-size:21px">${fM(B.paid)}</b></div>
-    <div class="k wide"><span>${B.due >= 0 ? "К выплате сейчас" : "Выплачено сверх начисленного"}</span><b class="num" style="color:${B.due >= 0 ? "var(--acc)" : "var(--day)"}">${fM(Math.abs(B.due))}</b></div></div>`;
+  h += `<div class="gh">Расчёт</div><div class="slip">
+    <div class="sl"><span>Начислено всего</span><b class="num">${fM(B.earned)}</b></div>
+    <div class="sl"><span>Выплачено</span><b class="num">${B.paid ? "−" : ""}${fM(B.paid)}</b></div><hr>
+    <div class="tot"><span>${B.due >= 0 ? "К выплате сейчас" : "Выплачено сверх начисленного"}</span><b class="num"${B.due >= 0 ? "" : ' style="color:var(--tx)"'}>${fM(Math.abs(B.due))}</b></div></div>`;
   if (isMgr()) h += `<div class="spacer"></div><div class="btns"><button class="btn" data-act="advance">Выдать аванс</button><button class="btn sec" data-act="payAll" ${B.due > 0 ? "" : "disabled"}>Выплатить всё</button></div>`;
   const pays = paysArr();
   h += `<div class="gh">Выплаты</div><div class="grp">${pays.length ? pays.slice(0, 30).map(x => `<div class="row ${isMgr() ? "tap" : ""}" ${isMgr() ? `data-act="editPay" data-id="${x.id}"` : ""}>
     <span class="lb">${PAYK[x.kind] || "Выплата"}<small>${dLong(x.date)} ${pd(x.date).getFullYear()}${x.note ? " · " + esc(x.note) : ""}</small></span><span class="val num" style="color:var(--tx)">−${fM(x.amount)}</span>${isMgr() ? `<span class="chev">›</span>` : ""}</div>`).join("") : `<div class="empty">Выплат пока не было</div>`}</div>`;
-  h += `<div class="spacer"></div><button class="btn gray" data-act="export" data-v="pay">Картинка с зарплатой</button>`;
+  h += `<div class="spacer"></div><button class="btn gray" data-act="export" data-v="pay">Расчёт картинкой</button>`;
   return h;
 }
 
 /* ---------- темы ---------- */
 const THEMES = [
   ["system", "Как в системе", null],
-  ["light", "Светлая", ["#f2f2f7", "#ffffff", "#ff375f"]],
-  ["dark", "Тёмная", ["#000000", "#1c1c1e", "#ff375f"]],
+  ["light", "Светлая", ["#f2f2f7", "#ffffff", "#d4204b"]],
+  ["mint", "Мята", ["#e9f3ee", "#ffffff", "#0b6e50"]],
+  ["sand", "Песок", ["#f4eee4", "#fffbf5", "#a8400a"]],
+  ["sky", "Небо", ["#e8f0fa", "#ffffff", "#1559c9"]],
+  ["dark", "Тёмная", ["#000000", "#1c1c1e", "#ff5c7e"]],
   ["graphite", "Графит", ["#111214", "#1d1f23", "#2ec4b6"]],
-  ["midnight", "Полночь", ["#070b17", "#111a2e", "#4f8cff"]],
-  ["violet", "Фиолетовая ночь", ["#0e0919", "#1a1230", "#9d7bff"]],
-  ["fox", "Лиса", ["#130c07", "#21150d", "#ff8a2a"]]
+  ["midnight", "Полночь", ["#070b17", "#111a2e", "#6aa0ff"]],
+  ["violet", "Фиолетовая ночь", ["#0e0919", "#1a1230", "#b29bff"]],
+  ["fox", "Лиса", ["#130c07", "#21150d", "#ff8a2a"]],
+  ["forest", "Лес", ["#08130e", "#10211a", "#52d68a"]],
+  ["cherry", "Вишня", ["#15070d", "#231019", "#ff7094"]],
+  ["contrast", "Контрастная", ["#000000", "#0c0c0c", "#ffd60a"]]
 ];
+const LIGHT_THEMES = ["light", "mint", "sand", "sky"];
 const themePref = () => { try { return localStorage.getItem("nanny.theme") || "system"; } catch (e) { return "system"; } };
 function applyTheme(){
   let t = themePref(); if (t === "system") t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
@@ -635,8 +777,8 @@ try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () =
 function themePicker(){
   const cur = themePref();
   const pv = (id, c) => {
-    if (!c) return `<span class="pv" style="background:linear-gradient(135deg,#f2f2f7 50%,#000 50%)"><i style="top:16%;background:linear-gradient(90deg,#fff 50%,#1c1c1e 50%)"></i><i style="top:36%;background:linear-gradient(90deg,#fff 50%,#1c1c1e 50%)"></i><b style="background:#ff375f"></b><span class="ck">✓</span></span>`;
-    return `<span class="pv" style="background:${c[0]}"><i style="top:16%;background:${c[1]}"></i><i style="top:36%;background:${c[1]}"></i><i style="top:56%;background:${c[1]};right:40%"></i><b style="background:${c[2]}"></b><span class="ck">✓</span></span>`;
+    if (!c) return `<span class="pv" style="background:linear-gradient(135deg,#f2f2f7 50%,#000 50%)"><i style="top:16%;background:linear-gradient(90deg,#fff 50%,#1c1c1e 50%)"></i><i style="top:36%;background:linear-gradient(90deg,#fff 50%,#1c1c1e 50%)"></i><b style="background:#d4204b"></b><span class="ck">${IC.check}</span></span>`;
+    return `<span class="pv" style="background:${c[0]}"><i style="top:16%;background:${c[1]}"></i><i style="top:36%;background:${c[1]}"></i><i style="top:56%;background:${c[1]};right:40%"></i><b style="background:${c[2]}"></b><span class="ck">${IC.check}</span></span>`;
   };
   return `<div class="gh">Оформление</div><div class="grp"><div class="themes">${THEMES.map(([id, name, c]) => `<button type="button" class="th ${cur === id ? "on" : ""}" data-act="theme" data-v="${id}">${pv(id, c)}<span>${name}</span></button>`).join("")}</div></div>
     <div class="gf">Тема сохраняется на этом телефоне. «Как в системе» переключает светлую и тёмную вместе с iPhone.</div>`;
@@ -663,14 +805,14 @@ function vMore(){
       <div class="row"><span class="lb">Имя</span><input class="val" data-set="name" value="${esc(st.name)}" placeholder="Няня"></div>
       <div class="row"><span class="lb">Валюта</span><input class="val" data-set="cur" value="${esc(st.cur)}" style="width:60px"></div></div>
       <div class="gh">Ставки за час</div><div class="grp">
-      <div class="row"><span class="ico" style="background:var(--acc)">₴</span><span class="lb">Обычная<small>до нормы смены</small></span><input class="val num" type="number" inputmode="decimal" data-set="rates.base" value="${r.base}"></div>
-      <div class="row"><span class="ico" style="background:#ff9f0a">+</span><span class="lb">Переработка<small>часы сверх нормы</small></span><input class="val num" type="number" inputmode="decimal" data-set="rates.over" value="${r.over}"></div>
-      <div class="row"><span class="ico" style="background:#af52de">♥</span><span class="lb">Ребёнок болеет<small>вместо обычной</small></span><input class="val num" type="number" inputmode="decimal" data-set="rates.sick" value="${r.sick}"></div></div>
+      <div class="row"><span class="ico">${IC.clock}</span><span class="lb">Обычная<small>до нормы смены</small></span><input class="val num" type="number" inputmode="decimal" data-set="rates.base" value="${r.base}"></div>
+      <div class="row"><span class="ico">${IC.up}</span><span class="lb">Переработка<small>часы сверх нормы</small></span><input class="val num" type="number" inputmode="decimal" data-set="rates.over" value="${r.over}"></div>
+      <div class="row"><span class="ico">${IC.heart}</span><span class="lb">Ребёнок болеет<small>вместо обычной</small></span><input class="val num" type="number" inputmode="decimal" data-set="rates.sick" value="${r.sick}"></div></div>
       <div class="gf">Новые ставки действуют для новых смен. Старые смены сохраняют свои ставки — так прошлые расчёты не меняются.</div>
       <div class="spacer"></div><button class="btn gray" data-act="reRate">Применить к будущим сменам</button>
       <div class="gh">Норма часов</div><div class="grp">
-      <div class="row"><span class="ico" style="background:var(--day)">Д</span><span class="lb">Дневная смена</span><input class="val num" type="number" inputmode="decimal" step="0.5" data-set="norms.day" value="${st.norms.day}"></div>
-      <div class="row"><span class="ico" style="background:var(--eve)">В</span><span class="lb">Вечерняя смена</span><input class="val num" type="number" inputmode="decimal" step="0.5" data-set="norms.evening" value="${st.norms.evening}"></div></div>
+      <div class="row"><span class="ico">${IC.sun}</span><span class="lb">Дневная смена</span><input class="val num" type="number" inputmode="decimal" step="0.5" data-set="norms.day" value="${st.norms.day}"></div>
+      <div class="row"><span class="ico">${IC.moon}</span><span class="lb">Вечерняя смена</span><input class="val num" type="number" inputmode="decimal" step="0.5" data-set="norms.evening" value="${st.norms.evening}"></div></div>
       <div class="gf">Часы до нормы оплачиваются обычной ставкой, сверх нормы — ставкой переработки.</div>`;
   } else {
     h += `<div class="gh">Ставки за час</div><div class="grp">
@@ -682,7 +824,7 @@ function vMore(){
   h += installBlock();
   h += `<div class="gh">Облако</div><div class="grp">`;
   if (cloudOn()) {
-    h += `<div class="row"><span class="ico" style="background:#0a84ff">${IC.cloud}</span><span class="lb">Синхронизация включена<small>${esc(S.url.replace(/^https:\/\//, ""))}</small></span></div>`;
+    h += `<div class="row"><span class="ico">${IC.cloudL}</span><span class="lb">Синхронизация включена<small>${esc(S.url.replace(/^https:\/\//, ""))}</small></span></div>`;
     if (isMgr()) h += `<div class="row tap" data-act="invite"><span class="lb link">Пригласить няню или второе устройство</span><span class="chev">›</span></div>`;
     h += `<div class="row tap" data-act="pullNow"><span class="lb link">Обновить сейчас</span></div>`;
   } else {
@@ -701,7 +843,7 @@ function vMore(){
   }
   h += `<div class="spacer"></div><div class="grp"><div class="row tap" data-act="logout"><span class="lb danger" style="text-align:center">Выйти</span></div></div>
     <div class="gf" style="text-align:center">Версия ${APP_VER}</div>
-    <div class="gf" style="text-align:center;padding-top:14px">Смены няни · ${cloudOn() ? "пространство " + esc(S.room.slice(0, 6)) : "локально"}</div>`;
+    <div class="gf" style="text-align:center;padding-top:16px">Смены няни · ${cloudOn() ? "пространство " + esc(S.room.slice(0, 6)) : "локально"}</div>`;
   return h;
 }
 function fbHelp(){
@@ -733,7 +875,7 @@ function renderAuth(){
       <div class="gh">Облако</div><div class="grp"><div class="row"><input class="full" data-bind="cr.url" value="${esc(c.url)}" placeholder="https://….firebasedatabase.app" autocapitalize="off" autocorrect="off" spellcheck="false"></div></div>
       <div class="gf">Без облака всё будет храниться только на этом телефоне. Подключить облако можно и позже.</div>
       ${fbHelp()}
-      ${c.err ? `<div class="gf danger" style="padding-top:14px">${esc(c.err)}</div>` : ""}
+      ${c.err ? `<div class="gf danger" style="padding-top:16px">${esc(c.err)}</div>` : ""}
       <div class="spacer"></div><button class="btn" data-act="create">Создать</button>
       <div class="spacer"></div><button class="btn gray" data-act="scr" data-v="welcome">Назад</button></div>`;
   }
@@ -747,7 +889,8 @@ function renderAuth(){
         ${j.err ? `<div class="gf danger" style="text-align:center">${esc(j.err)}</div>` : ""}<div class="spacer"></div><button class="btn" data-act="joinLink">Продолжить</button>`}
       <button class="btn gray" data-act="scr" data-v="welcome" style="margin-top:4px">Назад</button></div>`;
   }
-  return `<div class="welcome">${logo}<h1>Смены няни</h1><p class="c">График, часы и оплата — у руководителя и у няни в телефоне</p>
+  return `<div class="welcome">${logo}<h1>Смены няни</h1><p class="c">Руководитель записывает смены и выплаты, няня видит свой график и заработок</p>
+    <div class="sample"><div class="cap">Пример смены</div><div class="sr"><span>Среда</span><span class="num">09:00–17:30</span></div><span class="strip" role="img" aria-label="с 09:00 до 17:30"><b style="left:25%"></b><b style="left:50%"></b><b style="left:75%"></b><i style="left:37.5%;width:35.42%"></i></span><div class="sr" style="margin-top:8px"><small>8 ч 30 мин</small><small class="num">850 ₴</small></div></div>
     <button class="btn" data-act="scr" data-v="create">Я руководитель — начать</button>
     <button class="btn sec" data-act="scr" data-v="join">Войти по приглашению</button>
     ${S && S.room && D ? `<button class="btn gray" data-act="relogin">Войти снова</button>` : ""}</div>`;
@@ -784,7 +927,7 @@ const SHEETS = {
     const c = calc(x), hasAct = x.actual != null && x.actual !== "";
     return `<div class="grp">
       <div class="row"><span class="lb">Дата</span><input class="val" type="date" data-bind="sh.x.date" value="${x.date}"></div>
-      <div class="row" style="display:block;padding:10px 16px">${seg("sh.x.kind", [["day", "Дневная"], ["evening", "Вечерняя"], ["custom", "По часам"]], x.kind, "sseg")}</div>
+      <div class="row" style="display:block;padding:8px 16px">${seg("sh.x.kind", [["day", "Дневная"], ["evening", "Вечерняя"], ["custom", "По часам"]], x.kind, "sseg")}</div>
       ${x.kind === "custom" ? `<div class="row"><span class="lb">Начало</span><input class="val" type="time" step="60" data-bind="sh.x.start" data-rs="1" value="${x.start || "09:00"}"></div>
         <div class="row"><span class="lb">Конец</span><input class="val" type="time" step="60" data-bind="sh.x.end" data-rs="1" value="${x.end || "18:00"}"></div>` : ""}
       <div class="row"><span class="lb">Норма часов<small>${x.kind === "custom" ? "по времени смены" : `обычно ${fH(x.kind === "day" ? n.day : n.evening)}`}</small></span>
@@ -798,7 +941,7 @@ const SHEETS = {
       <div class="row"><span class="lb">${x.sick ? "По ставке «болеет»" : "Обычные часы"}<small>${fH(c.reg)} × ${fM(c.regRate)}</small></span><span class="val num">${fM(c.regSum)}</span></div>
       ${c.ot ? `<div class="row"><span class="lb">Переработка<small>${fH(c.ot)} × ${fM(c.otRate)}</small></span><span class="val num">${fM(c.otSum)}</span></div>` : ""}
       <div class="row"><span class="lb"><b>Итого</b></span><span class="val num" style="color:var(--tx);font-weight:600">${fM(c.sum)}</span></div></div>
-      <details class="help" style="margin-top:14px"><summary>Ставки этой смены</summary><div class="grp" style="margin-top:10px;background:var(--card2)">
+      <details class="help" style="margin-top:16px"><summary>Ставки этой смены</summary><div class="grp" style="margin-top:10px;background:var(--card2)">
         <div class="row"><span class="lb">Обычная</span><input class="val num" type="number" inputmode="decimal" data-bind="sh.x.rates.base" data-rs="1" data-n="1" value="${x.rates.base}"></div>
         <div class="row"><span class="lb">Переработка</span><input class="val num" type="number" inputmode="decimal" data-bind="sh.x.rates.over" data-rs="1" data-n="1" value="${x.rates.over}"></div>
         <div class="row"><span class="lb">Ребёнок болеет</span><input class="val num" type="number" inputmode="decimal" data-bind="sh.x.rates.sick" data-rs="1" data-n="1" value="${x.rates.sick}"></div></div></details>
@@ -816,9 +959,9 @@ const SHEETS = {
   pay(s){
     const B = balance(), x = s.x, amt = num(x.amount);
     const left = B.due + (s.id ? +D.pays[s.id].amount : 0) - amt;
-    return `<div class="kp" style="margin-top:6px"><div class="k wide acc"><span>${s.id ? "Было к выплате до этой выплаты" : "Наработано и не выплачено"}</span><b class="num">${fM(B.due + (s.id ? +D.pays[s.id].amount : 0))}</b></div></div>
+    return `<div class="kp" style="margin-top:8px"><div class="k wide"><span>${s.id ? "Было к выплате до этой выплаты" : "Наработано и не выплачено"}</span><b class="num">${fM(B.due + (s.id ? +D.pays[s.id].amount : 0))}</b></div></div>
       <div class="spacer"></div>${seg("sh.x.kind", [["advance", "Аванс"], ["salary", "Зарплата"]], x.kind, "sseg")}
-      <div class="gh">Сумма</div><div class="grp"><div class="row"><input class="val pin" style="letter-spacing:0;font-size:28px!important;font-weight:700" type="text" inputmode="decimal" data-bind="sh.x.amount" data-rs="1" value="${esc(x.amount)}" placeholder="0"></div>
+      <div class="gh">Сумма</div><div class="grp"><div class="row"><input class="val pin" style="letter-spacing:0;font-size:28px!important;font-weight:600" type="text" inputmode="decimal" data-bind="sh.x.amount" data-rs="1" value="${esc(x.amount)}" placeholder="0"></div>
       <div class="row" style="gap:8px;flex-wrap:wrap">${[[0.25, "25%"], [0.5, "50%"], [1, "Весь остаток"]].map(([k, l]) => `<button class="btn sm gray" data-act="payPart" data-v="${k}">${l}</button>`).join("")}</div></div>
       <div class="gf">${amt > 0 ? (left >= 0 ? `После выплаты останется: <b>${fM(left)}</b>` : `<span style="color:var(--day)">Это на ${fM(-left)} больше, чем наработано — разница учтётся в следующих сменах.</span>`) : "Введите сумму или выберите долю от остатка."}</div>
       <div class="gh">Детали</div><div class="grp"><div class="row"><span class="lb">Дата</span><input class="val" type="date" data-bind="sh.x.date" value="${x.date}"></div>
@@ -826,19 +969,19 @@ const SHEETS = {
       ${s.id ? `<div class="spacer"></div><div class="grp"><div class="row tap" data-act="delPay"><span class="lb danger" style="text-align:center">Удалить выплату</span></div></div>` : ""}`;
   },
   pin(s){
-    return `<div class="gf" style="padding:6px 4px 12px">Новый пин-код для входа: ${s.role === "mgr" ? "руководитель" : esc(D.settings.name)}. Минимум 4 цифры.</div>
+    return `<div class="gf" style="padding:8px 4px 12px">Новый пин-код для входа: ${s.role === "mgr" ? "руководитель" : esc(D.settings.name)}. Минимум 4 цифры.</div>
       <div class="grp"><div class="row"><input class="val pin" type="password" inputmode="numeric" autocomplete="new-password" data-bind="sh.v" placeholder="Новый пин-код"></div></div>`;
   },
   invite(){
     const l = inviteLink();
-    return `<div class="gf" style="padding:6px 4px 12px">Отправьте эту ссылку няне. Она откроет её на телефоне, выберет «Я няня» и введёт свой пин-код. По этой же ссылке можно войти как руководитель с другого устройства.</div>
+    return `<div class="gf" style="padding:8px 4px 12px">Отправьте эту ссылку няне. Она откроет её на телефоне, выберет «Я няня» и введёт свой пин-код. По этой же ссылке можно войти как руководитель с другого устройства.</div>
       <div class="grp"><div class="row"><span class="lb" style="font-size:13px;word-break:break-all;color:var(--tx2)">${esc(l)}</span></div></div>
       <div class="spacer"></div><div class="btns"><button class="btn" data-act="shareLink">Поделиться</button><button class="btn sec" data-act="copyLink">Скопировать</button></div>`;
   },
   img(s){
     return `${seg("sh.kind", [["week", "Неделя"], ["month", "Месяц"], ["pay", "Зарплата"]], s.kind, "imgKind")}
       <div class="pnav"><button class="icbtn" data-act="imgPer" data-v="-1">${IC.l}</button><b>${s.kind === "week" ? period("week", s.ref).label : s.kind === "month" ? monthTitle(s.ref) : (s.pm === "week" ? period("week", s.ref).label : monthTitle(s.ref))}</b><button class="icbtn" data-act="imgPer" data-v="1">${IC.r}</button></div>
-      ${s.kind === "pay" ? `<div style="padding-top:10px">${seg("sh.pm", [["month", "За месяц"], ["week", "За неделю"]], s.pm, "imgKind")}</div>` : ""}
+      ${s.kind === "pay" ? `<div style="padding-top:12px">${seg("sh.pm", [["month", "За месяц"], ["week", "За неделю"]], s.pm, "imgKind")}</div>` : ""}
       <div class="spacer"></div><img class="prev" id="imgPrev" alt="Картинка">
       <div class="spacer"></div><div class="btns"><button class="btn" data-act="imgShare">${IC.share.replace("<svg", '<svg width="20" height="20"')}${navigator.canShare ? "Поделиться" : "Скачать"}</button><button class="btn sec" data-act="imgCopy">Копировать</button></div>
       ${navigator.canShare ? `<div class="spacer"></div><button class="btn gray" data-act="imgSave">Скачать файл</button>` : ""}
@@ -852,16 +995,17 @@ function hexA(hex, a){ const m = String(hex).trim().match(/^#([0-9a-f]{6})$/i); 
 function imgTheme(){ // цвета картинки = цвета текущей темы приложения
   const cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
   const t = document.documentElement.getAttribute("data-theme") || "light";
-  Object.assign(IMG, { bg: v("--bg"), card: v("--card"), tx: v("--tx"), mu: v("--tx2"), mu2: v("--tx3"), sep: v("--sep"), acc: v("--acc"), g1: v("--g1"), g2: v("--g2"), kid: v("--kid"), dark: t !== "light",
-    glow: { fox: .22, violet: .26, midnight: .2 }[t] || 0,
+  Object.assign(IMG, { bg: v("--bg"), card: v("--card"), tx: v("--tx"), mu: v("--tx2"), mu2: v("--tx3"), sep: v("--sep"), acc: v("--acc"), accBg: v("--accBg") || v("--acc"), onacc: v("--onacc") || "#fff", kid: v("--kid"), dark: !LIGHT_THEMES.includes(t),
+    glow: { fox: .22, cherry: .2 }[t] || 0,
     kc: { day: v("--day"), evening: v("--eve"), custom: v("--cus") }, oc: { weekend: v("--wknd"), sick: v("--sick"), vacation: v("--vac") } });
 }
 function mkCanvas(h){ const c = document.createElement("canvas"); c.width = IMG.W * IMG.k; c.height = Math.ceil(h * IMG.k); const x = c.getContext("2d"); x.scale(IMG.k, IMG.k); x.fillStyle = IMG.bg; x.fillRect(0, 0, IMG.W, h); if (IMG.glow) { const g = x.createRadialGradient(IMG.W, -20, 0, IMG.W, -20, 420); g.addColorStop(0, hexA(IMG.acc, IMG.glow)); g.addColorStop(1, hexA(IMG.acc, 0)); x.fillStyle = g; x.fillRect(0, 0, IMG.W, Math.min(h, 460)); } x.textBaseline = "alphabetic"; return [c, x]; }
 const F = (w, s) => `${w} ${s}px ${IMG.font}`;
 function rr(x, X, Y, w, h, r, fill){ x.beginPath(); if (x.roundRect) x.roundRect(X, Y, w, h, r); else { x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + h, r); x.arcTo(X + w, Y + h, X, Y + h, r); x.arcTo(X, Y + h, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.closePath(); } if (fill) { x.fillStyle = fill; x.fill(); } }
 function tx(x, s, X, Y, font, col, align = "left", maxW){ x.font = font; x.fillStyle = col; x.textAlign = align; let t = String(s); if (maxW) { while (t.length > 1 && x.measureText(t).width > maxW) t = t.slice(0, -2) + "…"; } x.fillText(t, X, Y); return x.measureText(t).width; }
-function pillC(x, s, X, Y, col, font = F(700, 13), h = 24, align = "left"){ x.font = font; const w = x.measureText(s).width + 18; const L = align === "right" ? X - w : X; rr(x, L, Y, w, h, h / 2, col); tx(x, s, L + 9, Y + h / 2 + 4.6, font, "#fff"); return w; }
-function header(x, title, sub){ tx(x, title, 24, 52, F(800, 27), IMG.tx); tx(x, sub, 24, 78, F(500, 15), IMG.mu, "left", IMG.W - 48); }
+function onCol(c){ const m = String(c).trim().match(/^#([0-9a-f]{6})$/i); if (!m) return "#fff"; const n = parseInt(m[1], 16), f = v => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }, L = .2126 * f(n >> 16) + .7152 * f((n >> 8) & 255) + .0722 * f(n & 255); return (1.05) / (L + .05) >= (L + .05) / .05 ? "#fff" : "#1a1206"; }
+function pillC(x, s, X, Y, col, font = F(600, 13), h = 24, align = "left"){ x.font = font; const w = x.measureText(s).width + 18; const L = align === "right" ? X - w : X; rr(x, L, Y, w, h, h / 2, col); tx(x, s, L + 9, Y + h / 2 + 4.6, font, onCol(col)); return w; }
+function header(x, title, sub){ tx(x, title, 24, 52, F(600, 27), IMG.tx); tx(x, sub, 24, 78, F(500, 15), IMG.mu, "left", IMG.W - 48); }
 function footer(x, h){ tx(x, "Смены няни", IMG.W / 2, h - 18, F(500, 11.5), IMG.mu2, "center"); }
 function imgWeek(ref){
   const a = weekStart(ref), rowH = 60, top = 100, h = top + rowH * 7 + 16 + 64 + 44;
@@ -872,19 +1016,19 @@ function imgWeek(ref){
   for (let i = 0; i < 7; i++) {
     const d = addDays(a, i), y = top + i * rowH, sh = shiftsOn(d), of = offOn(d), isT = d === today();
     if (i) { x.fillStyle = IMG.sep; x.fillRect(32, y, IMG.W - 64, 1); }
-    tx(x, WD[i], 32, y + 27, F(700, 16), i > 4 ? IMG.acc : IMG.tx);
+    tx(x, WD[i], 32, y + 27, F(600, 16), i > 4 ? IMG.acc : IMG.tx);
     tx(x, dShort(d), 32, y + 46, F(500, 13), IMG.mu);
     if (isT) { rr(x, 22, y + 14, 4, 32, 2, IMG.acc); }
     let X = 104;
     for (const s of sh) { X += pillC(x, sLabel(s), X, y + 18, IMG.kc[s.kind]) + 6; if (s.sick) X += pillC(x, "болеет", X, y + 18, IMG.kid) + 6; H += hrs(s); N++; }
     for (const o of of) X += pillC(x, OFF[o.kind], X, y + 18, IMG.oc[o.kind]) + 6;
     if (!sh.length && !of.length) tx(x, "—", 104, y + 36, F(500, 15), IMG.mu2);
-    if (sh.length) tx(x, fH(sh.reduce((t, s) => t + hrs(s), 0)), IMG.W - 32, y + 36, F(700, 16), IMG.tx, "right");
+    if (sh.length) tx(x, fH(sh.reduce((t, s) => t + hrs(s), 0)), IMG.W - 32, y + 36, F(600, 16), IMG.tx, "right");
   }
   const y2 = top + rowH * 7 + 16;
   rr(x, 16, y2, IMG.W - 32, 64, 16, IMG.card);
   tx(x, "Итого", 32, y2 + 38, F(600, 16), IMG.mu);
-  tx(x, `${N} ${plural(N, "смена", "смены", "смен")} · ${fH(H)}`, IMG.W - 32, y2 + 39, F(800, 19), IMG.tx, "right");
+  tx(x, `${N} ${plural(N, "смена", "смены", "смен")} · ${fH(H)}`, IMG.W - 32, y2 + 39, F(600, 19), IMG.tx, "right");
   footer(x, h); return c;
 }
 function imgMonth(ref){
@@ -894,7 +1038,7 @@ function imgMonth(ref){
   const [c, x] = mkCanvas(h);
   header(x, `График · ${monthTitle(m)}`, D.settings.name);
   rr(x, 16, 96, IMG.W - 32, weeks * ch + 32 + 8, 16, IMG.card);
-  WD.forEach((w, i) => tx(x, w.toUpperCase(), 16 + cw * i + cw / 2, 118, F(700, 11), i > 4 ? IMG.acc : IMG.mu, "center"));
+  WD.forEach((w, i) => tx(x, w.toUpperCase(), 16 + cw * i + cw / 2, 118, F(600, 11), i > 4 ? IMG.acc : IMG.mu, "center"));
   let H = 0, N = 0, i = 0;
   for (let d = s0; d <= e0; d = addDays(d, 1), i++) {
     const col = i % 7, row = Math.floor(i / 7), X = 16 + col * cw, Y = top + row * ch, inM = d.slice(0, 7) === m.slice(0, 7);
@@ -902,17 +1046,17 @@ function imgMonth(ref){
     const sh = shiftsOn(d), of = offOn(d);
     if (of.length) { x.globalAlpha = IMG.dark ? .2 : .14; rr(x, X + 3, Y + 2, cw - 6, ch - 6, 10, IMG.oc[of[0].kind]); x.globalAlpha = 1; }
     if (d === today()) { x.strokeStyle = IMG.acc; x.lineWidth = 1.5; rr(x, X + 3, Y + 2, cw - 6, ch - 6, 10); x.stroke(); }
-    tx(x, String(pd(d).getDate()), X + 9, Y + 19, F(700, 13), IMG.tx);
+    tx(x, String(pd(d).getDate()), X + 9, Y + 19, F(600, 13), IMG.tx);
     if (sh.some(s => s.sick)) { x.fillStyle = IMG.kid; x.beginPath(); x.arc(X + cw - 12, Y + 13, 3.5, 0, 7); x.fill(); }
-    sh.slice(0, 2).forEach((s, k) => { const py = Y + 27 + k * 20; rr(x, X + 6, py, cw - 12, 17, 5, IMG.kc[s.kind]); tx(x, s.kind === "custom" ? sShort(s) : s.kind === "day" ? "Дневная" : "Вечер", X + cw / 2, py + 12.5, F(700, 10), "#fff", "center", cw - 16); H += hrs(s); N++; });
+    sh.slice(0, 2).forEach((s, k) => { const py = Y + 27 + k * 20; rr(x, X + 6, py, cw - 12, 17, 5, IMG.kc[s.kind]); tx(x, s.kind === "custom" ? sShort(s) : s.kind === "day" ? "Дневная" : "Вечер", X + cw / 2, py + 12.5, F(600, 10), onCol(IMG.kc[s.kind]), "center", cw - 16); H += hrs(s); N++; });
     if (sh.length > 2) sh.slice(2).forEach(s => { H += hrs(s); N++; });
-    if (!sh.length && of.length) tx(x, of[0].kind === "weekend" ? "Вых." : of[0].kind === "sick" ? "Больн." : "Отпуск", X + cw / 2, Y + 44, F(700, 10.5), IMG.oc[of[0].kind], "center", cw - 10);
+    if (!sh.length && of.length) tx(x, of[0].kind === "weekend" ? "Вых." : of[0].kind === "sick" ? "Больн." : "Отпуск", X + cw / 2, Y + 44, F(600, 10.5), IMG.oc[of[0].kind], "center", cw - 10);
     if (sh.length === 1) tx(x, fH(hrs(sh[0])), X + cw / 2, Y + 60, F(600, 10.5), IMG.mu, "center");
   }
   let y2 = top + weeks * ch + 18;
   rr(x, 16, y2, IMG.W - 32, 64, 16, IMG.card);
   tx(x, "Итого за месяц", 32, y2 + 38, F(600, 16), IMG.mu);
-  tx(x, `${N} ${plural(N, "смена", "смены", "смен")} · ${fH(H)}`, IMG.W - 32, y2 + 39, F(800, 19), IMG.tx, "right");
+  tx(x, `${N} ${plural(N, "смена", "смены", "смен")} · ${fH(H)}`, IMG.W - 32, y2 + 39, F(600, 19), IMG.tx, "right");
   y2 += 80; let X = 24;
   const leg = [["Дневная", IMG.kc.day], ["Вечерняя", IMG.kc.evening], ["По часам", IMG.kc.custom], ["Выходной", IMG.oc.weekend], ["Больничный", IMG.oc.sick], ["Отпуск", IMG.oc.vacation], ["Ребёнок болеет", IMG.kid]];
   let ly = y2;
@@ -928,7 +1072,7 @@ function imgPay(pm, ref){
   header(x, "Расчёт зарплаты", `${p.label}${pm === "week" ? " " + pd(p.to).getFullYear() : ""} · ${D.settings.name}`);
   let y = 100; rr(x, 16, y, IMG.W - 32, tblH, 16, IMG.card);
   const cx = [32, 140, 360, IMG.W - 32];
-  tx(x, "ДАТА", cx[0], y + 28, F(700, 11), IMG.mu); tx(x, "СМЕНА", cx[1], y + 28, F(700, 11), IMG.mu); tx(x, "ЧАСЫ", cx[2], y + 28, F(700, 11), IMG.mu, "right"); tx(x, "СУММА", cx[3], y + 28, F(700, 11), IMG.mu, "right");
+  tx(x, "ДАТА", cx[0], y + 28, F(600, 11), IMG.mu); tx(x, "СМЕНА", cx[1], y + 28, F(600, 11), IMG.mu); tx(x, "ЧАСЫ", cx[2], y + 28, F(600, 11), IMG.mu, "right"); tx(x, "СУММА", cx[3], y + 28, F(600, 11), IMG.mu, "right");
   y += 44;
   if (!list.length) tx(x, "Отработанных смен нет", IMG.W / 2, y + 26, F(500, 15), IMG.mu, "center");
   list.forEach(({ s, c: cc }, i) => {
@@ -936,22 +1080,21 @@ function imgPay(pm, ref){
     tx(x, `${dShort(s.date)}, ${WD[wdi(s.date)].toLowerCase()}`, cx[0], Y + 25, F(600, 13.5), IMG.tx);
     x.fillStyle = IMG.kc[s.kind]; x.beginPath(); x.arc(cx[1] + 4, Y + 20.5, 4, 0, 7); x.fill();
     const w = tx(x, sLabel(s), cx[1] + 14, Y + 25, F(500, 13.5), IMG.tx, "left", 140);
-    if (s.sick) pillC(x, "болеет", cx[1] + 20 + w, Y + 11, IMG.kid, F(700, 10), 18);
+    if (s.sick) pillC(x, "болеет", cx[1] + 20 + w, Y + 11, IMG.kid, F(600, 10), 18);
     tx(x, fN(cc.h) + (cc.ot ? ` (+${fN(cc.ot)})` : ""), cx[2], Y + 25, F(600, 13.5), cc.done ? IMG.tx : IMG.mu, "right");
-    tx(x, fM(cc.sum), cx[3], Y + 25, F(700, 13.5), IMG.tx, "right");
+    tx(x, fM(cc.sum), cx[3], Y + 25, F(600, 13.5), IMG.tx, "right");
   });
   y = 100 + tblH + 16;
   const sh2 = sumRows.length * 40 + 56; rr(x, 16, y, IMG.W - 32, sh2, 16, IMG.card);
   sumRows.forEach(([l, hh, sm], i) => { const Y = y + 8 + i * 40; if (i) { x.fillStyle = IMG.sep; x.fillRect(32, Y, IMG.W - 64, 1); } tx(x, l, 32, Y + 26, F(500, 15), IMG.tx); tx(x, hh, 330, Y + 26, F(500, 14), IMG.mu, "right"); tx(x, fM(sm), IMG.W - 32, Y + 26, F(600, 15), IMG.tx, "right"); });
   const Yt = y + 8 + sumRows.length * 40; x.fillStyle = IMG.sep; x.fillRect(32, Yt, IMG.W - 64, 1);
-  tx(x, "Начислено", 32, Yt + 32, F(800, 17), IMG.tx); tx(x, fH(A.h), 330, Yt + 32, F(600, 14), IMG.mu, "right"); tx(x, fM(A.sum), IMG.W - 32, Yt + 32, F(800, 19), IMG.tx, "right");
+  tx(x, "Начислено", 32, Yt + 32, F(600, 17), IMG.tx); tx(x, fH(A.h), 330, Yt + 32, F(600, 14), IMG.mu, "right"); tx(x, fM(A.sum), IMG.W - 32, Yt + 32, F(600, 19), IMG.tx, "right");
   y += sh2 + 16;
-  const g = x.createLinearGradient(16, y, IMG.W - 16, y + 128); g.addColorStop(0, IMG.g1); g.addColorStop(1, IMG.g2);
-  rr(x, 16, y, IMG.W - 32, 128, 16, g);
-  tx(x, "Выплачено за период", 32, y + 30, F(500, 14), "rgba(255,255,255,.85)"); tx(x, fM(A.paid), IMG.W - 32, y + 30, F(700, 15), "#fff", "right");
-  tx(x, "Всего выплачено", 32, y + 54, F(500, 14), "rgba(255,255,255,.85)"); tx(x, fM(B.paid), IMG.W - 32, y + 54, F(700, 15), "#fff", "right");
-  x.fillStyle = "rgba(255,255,255,.3)"; x.fillRect(32, y + 70, IMG.W - 64, 1);
-  tx(x, B.due >= 0 ? "Остаток к выплате" : "Выплачено наперёд", 32, y + 106, F(700, 16), "#fff"); tx(x, fM(Math.abs(B.due)), IMG.W - 32, y + 108, F(800, 26), "#fff", "right");
+  rr(x, 16, y, IMG.W - 32, 128, 16, IMG.accBg);
+  tx(x, "Выплачено за период", 32, y + 30, F(500, 14), IMG.onacc); tx(x, fM(A.paid), IMG.W - 32, y + 30, F(600, 15), IMG.onacc, "right");
+  tx(x, "Всего выплачено", 32, y + 54, F(500, 14), IMG.onacc); tx(x, fM(B.paid), IMG.W - 32, y + 54, F(600, 15), IMG.onacc, "right");
+  x.fillStyle = hexA(IMG.onacc, .35); x.fillRect(32, y + 70, IMG.W - 64, 1);
+  tx(x, B.due >= 0 ? "Остаток к выплате" : "Выплачено наперёд", 32, y + 106, F(600, 16), IMG.onacc); tx(x, fM(Math.abs(B.due)), IMG.W - 32, y + 108, F(600, 26), IMG.onacc, "right");
   footer(x, h); return c;
 }
 function imgMake(s){ imgTheme(); return s.kind === "week" ? imgWeek(s.ref) : s.kind === "month" ? imgMonth(s.ref) : imgPay(s.pm, s.ref); }
@@ -980,7 +1123,7 @@ function openShift(id, date){
 const ACT = {
   theme(el){ try { localStorage.setItem("nanny.theme", el.dataset.v); } catch (e) {} applyTheme(); vib(); render(true); },
   tab(el){ UI.tab = el.dataset.v; vib(); scrollTo(0, 0); render(); },
-  segr(el){ setBind(el.dataset.b, el.dataset.v); render(true); },
+  segr(el){ setBind(el.dataset.b, el.dataset.v); if (el.dataset.b === "cv") { try { localStorage.setItem("nanny.calview", el.dataset.v); } catch (e) {} } render(true); },
   sseg(el){ setBind(el.dataset.b, el.dataset.v); if (SH.type === "pay" && !SH.id) SH.title = SH.x.kind === "advance" ? "Выдать аванс" : "Выплата зарплаты"; if (SH.type === "shift" && el.dataset.b === "sh.x.kind") { const n = D.settings.norms, x = SH.x; x.norm = x.kind === "custom" ? spanHours(x.start, x.end) : x.kind === "day" ? +n.day : +n.evening; } renderSheet(); },
   scr(el){ UI.scr = el.dataset.v; UI.cr.err = UI.jn.err = ""; render(); },
   close(){ closeSheet(); },
@@ -1001,6 +1144,7 @@ const ACT = {
   editShift(el){ openShift(el.dataset.id); },
   viewShift(el){ openShift(el.dataset.id); },
   quickShift(){ UI.form.date = UI.sel; openShift(null, UI.sel); },
+  dayAdd(el){ UI.sel = el.dataset.v; vib(); ACT.quickShift(); },
   quickOff(){ openSheet({ type: "off", x: { kind: "weekend", from: UI.sel, to: UI.sel, note: "" }, title: "Новое отсутствие", right: "Готово", rightAct: "saveOff" }); },
   editOff(el){ openSheet({ type: "off", id: el.dataset.id, x: { ...D.off[el.dataset.id] }, title: OFF[D.off[el.dataset.id].kind], right: "Готово", rightAct: "saveOff" }); },
   step(el){ const k = el.dataset.b, x = SH.x; let v = x[k] == null || x[k] === "" ? hNum(x.norm) : hNum(x[k]); v = Math.max(0, r4(v + +el.dataset.v)); x[k] = v; renderSheet(); },
@@ -1072,7 +1216,7 @@ const ACT = {
       try { const r = await fetch(`${url}/rooms/${S.room}.json`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(D) }); if (!r.ok) throw new Error(r.status === 401 || r.status === 403 ? "Нет доступа к базе. Проверьте правила (Rules) в Firebase — шаг 3." : "Облако ответило ошибкой " + r.status); }
       catch (e) { c.err = e.message && !/fetch/i.test(e.message) ? e.message : "Не удалось связаться с облаком. Проверьте адрес и интернет."; S = null; D = null; return render(); }
     }
-    LS.set(SKEY, S); saveLocal(); UI.tab = "shifts"; startLive(); render(); toast("Готово! Добавьте первую смену");
+    LS.set(SKEY, S); saveLocal(); UI.tab = "shifts"; startLive(); render(); toast("Готово. Добавьте первую смену");
   },
   async joinLink(){
     const j = UI.jn; j.err = ""; const m = String(j.link).match(/join=([A-Za-z0-9_-]+)/);
@@ -1085,9 +1229,9 @@ const ACT = {
     if (!d.settings.auth[j.role] || d.settings.auth[j.role] !== h) { j.err = "Неверный пин-код"; j.pin = ""; D = prev; return render(); }
     S = { url: j.url, room: j.room, role: j.role }; LS.set(SKEY, S); saveLocal();
     UI.tab = j.role === "mgr" ? "shifts" : "cal"; UI.jn = { link: "", role: "nanny", pin: "", err: "", data: null, url: "", room: "" };
-    startLive(); render(); toast(j.role === "mgr" ? "Вы вошли как руководитель" : `Привет, ${d.settings.name}!`);
+    startLive(); render(); toast(j.role === "mgr" ? "Вы вошли как руководитель" : `Вы вошли как ${d.settings.name}`);
   },
-  export(el){ openSheet({ type: "img", kind: el.dataset.v || "month", pm: UI.sm === "week" ? "week" : "month", ref: el.dataset.v === "pay" ? UI.sref : UI.tab === "cal" ? (el.dataset.v === "week" ? UI.sel : UI.cal) : today(), title: "Картинка", left: "Закрыть", after: imgRefresh }); },
+  export(el){ openSheet({ type: "img", kind: el.dataset.v || "month", pm: UI.sm === "week" ? "week" : "month", ref: el.dataset.v === "pay" ? UI.sref : UI.tab === "cal" ? (el.dataset.v === "week" ? UI.sel : UI.cal) : today(), title: "Поделиться", left: "Закрыть", after: imgRefresh }); },
   imgKind(el){ setBind(el.dataset.b, el.dataset.v); renderSheet(); },
   imgPer(el){ const v = +el.dataset.v; SH.ref = (SH.kind === "week" || (SH.kind === "pay" && SH.pm === "week")) ? addDays(SH.ref, 7 * v) : addMonths(SH.ref, v); renderSheet(); },
   async imgShare(){
