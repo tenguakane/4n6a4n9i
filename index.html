@@ -921,8 +921,24 @@ function renderAuth(){
 }
 
 /* =================== шторки =================== */
-function openSheet(state){ SH = state; renderSheet(); requestAnimationFrame(() => requestAnimationFrame(() => $("#sheetRoot").classList.add("on"))); }
-function closeSheet(){ const r = $("#sheetRoot"); r.classList.remove("on"); SH = null; setTimeout(() => { if (!SH) r.innerHTML = ""; }, 330); }
+// История: жест «назад» закрывает окно или возвращает на прошлую вкладку, а не выходит из приложения.
+const NAV = { quiet: false };
+const navState = extra => Object.assign({ app: 1, tab: UI.tab, scr: UI.scr }, extra);
+function navPush(extra){ try { history.pushState(navState(extra), "", location.href); } catch (e) {} }
+function navInit(){ try { history.replaceState({ base: 1 }, "", location.href); history.pushState(navState(), "", location.href); } catch (e) {} }
+window.addEventListener("popstate", e => {
+  if (NAV.quiet) { NAV.quiet = false; return; }
+  const st = e.state;
+  if (!st || st.base) { navPush(); if (SH) closeSheet(true); return; }  // корень: остаёмся в приложении
+  if (SH && !st.sheet) closeSheet(true);
+  if (st.sheet) return;
+  const inApp = S && S.role && D;
+  if (inApp && st.tab && st.tab !== UI.tab) { UI.tab = st.tab; scrollTo(0, 0); render(); }
+  else if (!inApp && st.scr && st.scr !== UI.scr) { UI.scr = st.scr; render(); }
+});
+function openSheet(state){ if (!(history.state && history.state.sheet)) navPush({ sheet: 1 }); SH = state; renderSheet(); requestAnimationFrame(() => requestAnimationFrame(() => $("#sheetRoot").classList.add("on"))); }
+function closeSheet(pop){ if (pop !== true && history.state && history.state.sheet) { NAV.quiet = true; history.back(); }
+  const r = $("#sheetRoot"); r.classList.remove("on"); SH = null; setTimeout(() => { if (!SH) r.innerHTML = ""; }, 330); }
 function renderSheet(){
   if (!SH) return;
   const r = $("#sheetRoot"), body = SHEETS[SH.type](SH);
@@ -1155,10 +1171,10 @@ function openShift(id, date){
 }
 const ACT = {
   theme(el){ try { localStorage.setItem("nanny.theme", el.dataset.v); } catch (e) {} applyTheme(); vib(); render(true); },
-  tab(el){ UI.tab = el.dataset.v; vib(); scrollTo(0, 0); render(); },
+  tab(el){ const ch = UI.tab !== el.dataset.v; UI.tab = el.dataset.v; if (ch) navPush(); vib(); scrollTo(0, 0); render(); },
   segr(el){ setBind(el.dataset.b, el.dataset.v); if (el.dataset.b === "cv") { try { localStorage.setItem("nanny.calview", el.dataset.v); } catch (e) {} } render(true); },
   sseg(el){ setBind(el.dataset.b, el.dataset.v); if (SH.type === "pay" && !SH.id) SH.title = SH.x.kind === "advance" ? "Выдать аванс" : "Выплата зарплаты"; if (SH.type === "shift" && el.dataset.b === "sh.x.kind") { const n = D.settings.norms, x = SH.x; x.norm = x.kind === "custom" ? spanHours(x.start, x.end) : x.kind === "day" ? +n.day : +n.evening; } renderSheet(); },
-  scr(el){ UI.scr = el.dataset.v; UI.cr.err = UI.jn.err = ""; render(); },
+  scr(el){ UI.scr = el.dataset.v; navPush(); UI.cr.err = UI.jn.err = ""; render(); },
   close(){ closeSheet(); },
   addShift(){
     const s = newShift(); if (!s.date) return toast("Укажите дату");
@@ -1354,12 +1370,13 @@ addEventListener("appinstalled", () => { PWA.deferred = null; toast("Прило�
 
 /* =================== старт =================== */
 (function init(){
+  navInit();
   applyTheme();
   if (S && S.room) { D = LS.get(dKey(), null); if (D) D = norm(D); }
   if (S && S.room && !D && !S.url) S = null;
   const m = location.hash.match(/join=([A-Za-z0-9_-]+)/);
   if (m) {
-    history.replaceState(null, "", location.pathname + location.search);
+    history.replaceState(history.state, "", location.pathname + location.search);
     try { const inv = JSON.parse(b64d(m[1])); if (S && S.role && S.room === inv.r) { /* уже вошли в это пространство */ } else { UI.scr = "join"; render(); joinFrom(m[1]); return; } } catch (e) {}
   }
   if (S && S.role && D) { UI.tab = isMgr() ? "shifts" : "cal"; startLive(); }
