@@ -199,6 +199,7 @@ button:focus-visible,[data-act]:focus-visible,summary:focus-visible{outline:2px 
 /* шкала дня 0–24 ч: когда именно няня с ребёнком. Метки на 6, 12 и 18 часах */
 .strip{--k:var(--cus);position:relative;display:block;height:4px;border-radius:2px;overflow:hidden;margin-top:8px;background:color-mix(in srgb,var(--k) 22%,transparent)}
 .strip i{position:absolute;top:0;bottom:0;min-width:4px;border-radius:2px;background:var(--k)}
+.strip i.ot{background:color-mix(in srgb,var(--k) 50%,transparent)}
 .strip b{position:absolute;top:0;bottom:0;width:1px;background:var(--card)}
 
 /* ---------- календарь ---------- */
@@ -507,13 +508,20 @@ function fixShift(s){
 }
 // Шкала дня 0–24 ч для смен «по часам»: у дневной и вечерней смены точного времени нет, поэтому шкалы у них нет
 const stripSegs = s => { const [h1, m1] = s.start.split(":").map(Number), [h2, m2] = s.end.split(":").map(Number), a = h1 * 60 + m1, b = h2 * 60 + m2; return b > a ? [[a, b]] : [[a, 1440], [0, b]]; };
-const strip = s => s.kind === "custom" && s.start && s.end ? `<span class="strip" style="--k:${KCOL[s.kind]}" role="img" aria-label="с ${s.start} до ${s.end}"><b style="left:25%"></b><b style="left:50%"></b><b style="left:75%"></b>${stripSegs(s).map(([a, b]) => `<i style="left:${(a / 14.4).toFixed(2)}%;width:${((b - a) / 14.4).toFixed(2)}%"></i>`).join("")}</span>` : "";
-const hrs = s => s.actual != null && s.actual !== "" ? hNum(s.actual) : hNum(s.norm);
+const strip = s => { if (s.kind !== "custom" || !s.start || !s.end) return "";
+  const [h2, m2] = s.end.split(":").map(Number), e = h2 * 60 + m2, ot = calc(s).ot;
+  const over = ot > 0 && e > 0 ? `<i class="ot" style="left:${(e / 14.4).toFixed(2)}%;width:${((Math.min(1440, e + ot * 60) - e) / 14.4).toFixed(2)}%"></i>` : "";
+  return `<span class="strip" style="--k:${KCOL[s.kind]}" role="img" aria-label="с ${s.start} до ${s.end}${ot > 0 ? `, сверх плана ${fH(ot)}` : ""}"><b style="left:25%"></b><b style="left:50%"></b><b style="left:75%"></b>${stripSegs(s).map(([a, b]) => `<i style="left:${(a / 14.4).toFixed(2)}%;width:${((b - a) / 14.4).toFixed(2)}%"></i>`).join("")}${over}</span>`; };
+// Дописанные часы (s.extra): няня задержалась сверх плана. Они всегда идут по ставке переработки.
+const extraH = s => hNum(s.extra) > 0 ? hNum(s.extra) : 0;
+const baseH = s => s.actual != null && s.actual !== "" ? hNum(s.actual) : hNum(s.norm);
+const hrs = s => r4(baseH(s) + extraH(s));
+// Обычная ставка: часы в пределах плана смены. Ставка переработки: всё, что сверх плана (отработанное сверх нормы + дописанные часы).
 function calc(s){
-  const r = s.rates || D.settings.rates, h = hrs(s), n = hNum(s.norm);
-  const reg = Math.min(h, n), ot = Math.max(0, r4(h - n));
+  const r = s.rates || D.settings.rates, n = hNum(s.norm), h0 = baseH(s), extra = extraH(s), h = r4(h0 + extra);
+  const reg = Math.min(h0, n), ot = r4(Math.max(0, h0 - n) + extra);
   const regRate = s.sick ? +r.sick : +r.base, otRate = s.sick ? Math.max(+r.over, +r.sick) : +r.over;
-  return { h, reg, ot, regRate, otRate, regSum: reg * regRate, otSum: ot * otRate, sum: reg * regRate + ot * otRate, done: s.actual != null && s.actual !== "" };
+  return { h, reg, ot, extra, regRate, otRate, regSum: reg * regRate, otSum: ot * otRate, sum: reg * regRate + ot * otRate, done: s.actual != null && s.actual !== "" };
 }
 const shiftsArr = () => Object.entries(D.shifts).map(([id, s]) => ({ id, ...fixShift(s) })).sort((a, b) => a.date.localeCompare(b.date) || (a.start || "").localeCompare(b.start || ""));
 const offArr = () => Object.entries(D.off).map(([id, o]) => ({ id, ...o })).sort((a, b) => a.from.localeCompare(b.from));
@@ -630,7 +638,7 @@ function vShifts(){
       <span class="ico"><i class="dot" style="background:${KCOL[s.kind]}"></i></span>
       <span class="lb">${dLong(s.date)}, ${WD[wdi(s.date)].toLowerCase()}<small>${esc(sLabel(s))} · норма ${fH(s.norm)}${s.sick ? " · ребёнок болел" : ""}</small></span>
       <button class="btn sm sec" data-act="asNorm" data-id="${s.id}">По норме</button></div>`).join("")}</div>
-      <div class="gf">«По норме» ставит фактические часы равными норме. Нажмите на смену, чтобы указать недоработку или переработку.</div>`;
+      <div class="gf">«По норме» ставит фактические часы равными норме. Нажмите на смену, чтобы указать недоработку, переработку или дописать часы.</div>`;
   }
   const up = all.filter(s => s.date >= t).slice(0, 14);
   h += `<div class="gh">Ближайшие смены</div>` + (up.length ? `<div class="grp">${up.map(shiftRow).join("")}</div>` : `<div class="grp"><div class="empty">Запланированных смен нет</div></div>`);
@@ -806,7 +814,7 @@ function vMore(){
       <div class="row"><span class="lb">Валюта</span><input class="val" data-set="cur" value="${esc(st.cur)}" style="width:60px"></div></div>
       <div class="gh">Ставки за час</div><div class="grp">
       <div class="row"><span class="ico">${IC.clock}</span><span class="lb">Обычная<small>до нормы смены</small></span><input class="val num" type="number" inputmode="decimal" data-set="rates.base" value="${r.base}"></div>
-      <div class="row"><span class="ico">${IC.up}</span><span class="lb">Переработка<small>часы сверх нормы</small></span><input class="val num" type="number" inputmode="decimal" data-set="rates.over" value="${r.over}"></div>
+      <div class="row"><span class="ico">${IC.up}</span><span class="lb">Переработка<small>всё сверх плана смены</small></span><input class="val num" type="number" inputmode="decimal" data-set="rates.over" value="${r.over}"></div>
       <div class="row"><span class="ico">${IC.heart}</span><span class="lb">Ребёнок болеет<small>вместо обычной</small></span><input class="val num" type="number" inputmode="decimal" data-set="rates.sick" value="${r.sick}"></div></div>
       <div class="gf">Новые ставки действуют для новых смен. Старые смены сохраняют свои ставки — так прошлые расчёты не меняются.</div>
       <div class="spacer"></div><button class="btn gray" data-act="reRate">Применить к будущим сменам</button>
@@ -917,11 +925,12 @@ const SHEETS = {
         <div class="row"><span class="lb">Смена</span><span class="val">${esc(sLabel(x))}</span></div>
         <div class="row"><span class="lb">Норма</span><span class="val num">${fH(x.norm)}</span></div>
         <div class="row"><span class="lb">Отработано</span><span class="val num">${c.done ? fH(c.h) : "не указано"}</span></div>
+        ${c.extra ? `<div class="row"><span class="lb">Дописано сверх плана</span><span class="val num">${fH(c.extra)}</span></div>` : ""}
         ${x.sick ? `<div class="row"><span class="lb">Ребёнок болел</span><span class="val">да</span></div>` : ""}
         ${x.note ? `<div class="row"><span class="lb">Заметка</span><span class="val" style="white-space:normal">${esc(x.note)}</span></div>` : ""}</div>
         <div class="gh">Оплата</div><div class="grp">
         <div class="row"><span class="lb">${x.sick ? "По ставке «болеет»" : "Обычные часы"}<small>${fH(c.reg)} × ${fM(c.regRate)}</small></span><span class="val num">${fM(c.regSum)}</span></div>
-        ${c.ot ? `<div class="row"><span class="lb">Переработка<small>${fH(c.ot)} × ${fM(c.otRate)}</small></span><span class="val num">${fM(c.otSum)}</span></div>` : ""}
+        ${c.ot ? `<div class="row"><span class="lb">Переработка<small>${fH(c.ot)} × ${fM(c.otRate)}${c.extra ? ` · из них дописано ${fH(c.extra)}` : ""}</small></span><span class="val num">${fM(c.otSum)}</span></div>` : ""}
         <div class="row"><span class="lb"><b>Итого</b></span><span class="val num" style="color:var(--tx);font-weight:600">${fM(c.sum)}</span></div></div>`;
     }
     const c = calc(x), hasAct = x.actual != null && x.actual !== "";
@@ -937,9 +946,14 @@ const SHEETS = {
       <div class="row"><span class="lb">Фактически отработано<small>${hasAct ? (c.ot ? `переработка ${fH(c.ot)}` : c.h < hNum(x.norm) ? `недоработка ${fH(hNum(x.norm) - c.h)}` : "ровно по норме") : "пока не указано — считается по норме"}</small></span>
         <div class="stepper"><button data-act="step" data-b="actual" data-v="-0.5">−</button><input type="text" inputmode="decimal" data-bind="sh.x.actual" data-rs="1" data-n="1" placeholder="—" value="${hasAct ? fN(x.actual) : ""}"><button data-act="step" data-b="actual" data-v="0.5">+</button></div></div>
       <div class="row"><button class="btn sm sec" data-act="actNorm">Как по норме</button>${hasAct ? `<button class="btn sm gray" data-act="actClear">Очистить</button>` : ""}</div></div>
+      <div class="gh">Дописать часы</div><div class="grp">
+      <div class="row"><span class="lb">Задержалась сверх плана<small>${c.extra ? `дописано ${fH(c.extra)}, всё по ставке переработки` : "добавьте, сколько часов она осталась сверх плана"}</small></span>
+        <div class="stepper"><button data-act="step" data-b="extra" data-v="-0.5">−</button><input type="text" inputmode="decimal" data-bind="sh.x.extra" data-rs="1" data-n="1" placeholder="0" value="${c.extra ? fN(c.extra) : ""}"><button data-act="step" data-b="extra" data-v="0.5">+</button></div></div>
+      <div class="row"><button class="btn sm sec" data-act="addExtra" data-v="0.5">+30 мин</button><button class="btn sm sec" data-act="addExtra" data-v="1">+1 ч</button><button class="btn sm sec" data-act="addExtra" data-v="2">+2 ч</button>${c.extra ? `<button class="btn sm gray" data-act="extraClear">Сбросить</button>` : ""}</div></div>
+      <div class="gf">Часы по плану идут по обычной ставке. Всё, что сверх плана, и фактическая переработка, и дописанные часы, по ставке переработки.</div>
       <div class="gh">Оплата смены</div><div class="grp">
       <div class="row"><span class="lb">${x.sick ? "По ставке «болеет»" : "Обычные часы"}<small>${fH(c.reg)} × ${fM(c.regRate)}</small></span><span class="val num">${fM(c.regSum)}</span></div>
-      ${c.ot ? `<div class="row"><span class="lb">Переработка<small>${fH(c.ot)} × ${fM(c.otRate)}</small></span><span class="val num">${fM(c.otSum)}</span></div>` : ""}
+      ${c.ot ? `<div class="row"><span class="lb">Переработка<small>${fH(c.ot)} × ${fM(c.otRate)}${c.extra ? ` · из них дописано ${fH(c.extra)}` : ""}</small></span><span class="val num">${fM(c.otSum)}</span></div>` : ""}
       <div class="row"><span class="lb"><b>Итого</b></span><span class="val num" style="color:var(--tx);font-weight:600">${fM(c.sum)}</span></div></div>
       <details class="help" style="margin-top:16px"><summary>Ставки этой смены</summary><div class="grp" style="margin-top:10px;background:var(--card2)">
         <div class="row"><span class="lb">Обычная</span><input class="val num" type="number" inputmode="decimal" data-bind="sh.x.rates.base" data-rs="1" data-n="1" value="${x.rates.base}"></div>
@@ -1112,6 +1126,7 @@ function cleanShift(x){
   const o = { date: x.date, kind: x.kind, norm: r4(hNum(x.norm)), sick: !!x.sick, note: String(x.note || "").trim(), rates: { base: num(x.rates.base), over: num(x.rates.over), sick: num(x.rates.sick) }, at: x.at || Date.now() };
   if (x.kind === "custom") { o.start = x.start || "09:00"; o.end = x.end || "18:00"; }
   if (x.actual != null && x.actual !== "") o.actual = r4(Math.max(0, hNum(x.actual)));
+  if (hNum(x.extra) > 0) o.extra = r4(hNum(x.extra));
   return o;
 }
 function openShift(id, date){
@@ -1147,9 +1162,12 @@ const ACT = {
   dayAdd(el){ UI.sel = el.dataset.v; vib(); ACT.quickShift(); },
   quickOff(){ openSheet({ type: "off", x: { kind: "weekend", from: UI.sel, to: UI.sel, note: "" }, title: "Новое отсутствие", right: "Готово", rightAct: "saveOff" }); },
   editOff(el){ openSheet({ type: "off", id: el.dataset.id, x: { ...D.off[el.dataset.id] }, title: OFF[D.off[el.dataset.id].kind], right: "Готово", rightAct: "saveOff" }); },
-  step(el){ const k = el.dataset.b, x = SH.x; let v = x[k] == null || x[k] === "" ? hNum(x.norm) : hNum(x[k]); v = Math.max(0, r4(v + +el.dataset.v)); x[k] = v; renderSheet(); },
+  step(el){ const k = el.dataset.b, x = SH.x; let v = x[k] == null || x[k] === "" ? (k === "extra" ? 0 : hNum(x.norm)) : hNum(x[k]); v = Math.max(0, r4(v + +el.dataset.v)); x[k] = v;
+    if (k === "extra" && v > 0 && (x.actual == null || x.actual === "")) x.actual = hNum(x.norm); renderSheet(); },
+  addExtra(el){ const x = SH.x; x.extra = r4(extraH(x) + +el.dataset.v); if (x.actual == null || x.actual === "") x.actual = hNum(x.norm); vib(); renderSheet(); },
+  extraClear(){ SH.x.extra = 0; renderSheet(); },
   actNorm(){ SH.x.actual = hNum(SH.x.norm); renderSheet(); },
-  actClear(){ SH.x.actual = null; renderSheet(); },
+  actClear(){ SH.x.actual = null; SH.x.extra = 0; renderSheet(); },
   saveShift(){
     const x = SH.x; if (!x.date) return toast("Укажите дату");
     if (x.kind === "custom") { const n = spanHours(x.start, x.end); if (!SH.normTouched) x.norm = n; }
